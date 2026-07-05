@@ -1,0 +1,47 @@
+# --- C++ / CMake ---
+build/
+*.pgm
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Testing/
+Makefile
+cmake_install.cmake
+compile_commands.json
+*.o
+*.obj
+*.exe
+*.out
+*.dSYM/
+
+# --- Unity ---
+unity-client/Library/
+unity-client/Temp/
+unity-client/Obj/
+unity-client/Build/
+unity-client/Builds/
+unity-client/Logs/
+unity-client/MemoryCaptures/
+unity-client/UserSettings/
+unity-client/*.csproj
+unity-client/*.sln
+unity-client/.vs/
+
+# --- Editor / OS ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- Benchmarks output (raw runs, keep summarized reports only) ---
+benchmarks/raw/
+
+# --- Scratch C++ practice (not part of the project) ---
+practice/
+
+# claude
+CLAUDE.md
+.claude/
+
+# --- Internal-only docs (planning notes, worklog — not for public repo) ---
+docs/private/
