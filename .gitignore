@@ -39,6 +39,10 @@ benchmarks/raw/
 # --- Scratch C++ practice (not part of the project) ---
 practice/
 
+# --- Python (tools/) ---
+__pycache__/
+*.pyc
+
 # claude
 CLAUDE.md
 .claude/
