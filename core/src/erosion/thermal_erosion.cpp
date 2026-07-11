@@ -1,7 +1,9 @@
 #include "thermal_erosion.h"
+#include <vector>;
 
-LowestNeighbor findLowestNeighbor(const Heightmap& h, int x, int y) {
-    LowestNeighbor best{x, y, h.at(x, y)};  // 일단 "자기 자신"으로 시작 (자기보다 낮은 이웃만 갱신되게)
+std::vector<LowestNeighbor> findLowestNeighbor(const Heightmap& h, int x, int y) {
+    std::vector<LowestNeighbor> candidates;
+    LowestNeighbor current{x, y, h.at(x, y), 0};  // 일단 "자기 자신"으로 시작 (자기보다 낮은 이웃만 갱신되게)
 
     int dx[4] = {-1, 1, 0, 0};
     int dy[4] = {0, 0, -1, 1};
@@ -14,12 +16,12 @@ LowestNeighbor findLowestNeighbor(const Heightmap& h, int x, int y) {
         // TODO: 범위 안이고, h.at(nx, ny)가 best.value보다 작으면 best 갱신
         //       (best = LowestNeighbor{nx, ny, h.at(nx, ny)};)
         if(0<= nx && nx < h.width() && 0 <= ny && ny < h.height()) {
-            if(h.at(nx,ny) <= best.value ){
-                best = LowestNeighbor{nx, ny, h.at(nx, ny)};
+            if(h.at(nx,ny) < current.value ){
+                candidates.push_back(LowestNeighbor{nx, ny, h.at(nx, ny), h.at(x, y) - h.at(nx, ny)});
             }
         }
     }
-    return best;
+    return candidates;
 
 }   
 
@@ -29,21 +31,25 @@ void thermalErode(Heightmap& height, float talusAngle, float erosionRate, int it
 
         for (int y = 0; y < height.height(); ++y) {
             for (int x = 0; x < height.width(); ++x) {
-                LowestNeighbor n = findLowestNeighbor(height, x, y);
-                float diff;
-                diff = height.at(x,y) - n.value;
-
-                if(diff > talusAngle){
-                    float moveAmount;
-                    moveAmount = (diff - talusAngle) * erosionRate;
-                    next.at(x,y) -= moveAmount;
-                    next.at(n.x, n.y) += moveAmount;
+                std::vector<LowestNeighbor> candidates = findLowestNeighbor(height, x, y);
+                float d_max = 0;
+                float d_total = 0;
+                for (const auto& c : candidates) {  // C#의 foreach(var c in candidates), Python의 for c in candidates
+                    d_total += c.diff;
+                    if(c.diff>=d_max){
+                        d_max = c.diff;
+                    }
                 }
-                // TODO: diff = height.at(x,y) - n.value 계산 
-                // TODO: diff > talusAngle이면
-                //       moveAmount = (diff - talusAngle) * erosionRate
-                //       next.at(x, y) -= moveAmount
-                //       next.at(n.x, n.y) += moveAmount
+
+                if(d_max > talusAngle){
+                    float moveAmount;
+                    moveAmount = (d_max - talusAngle) * erosionRate;
+                    next.at(x,y) -= moveAmount;
+                    
+                    for (const auto& c : candidates) {  // C#의 foreach(var c in candidates), Python의 for c in candidates
+                        next.at(c.x,c.y) += moveAmount*c.diff/d_total;
+                    }
+                }
             }   
         }   
 
