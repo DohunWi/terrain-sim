@@ -15,6 +15,7 @@ add_executable(terrain_sim_core
     src/main.cpp
     src/heightmap.cpp
     src/erosion/thermal_erosion.cpp
+    src/noise/perlin_noise.cpp
     src/pgm.cpp
 )
 
