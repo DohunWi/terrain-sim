@@ -22,6 +22,17 @@ add_executable(terrain_sim_core
 
 target_include_directories(terrain_sim_core PRIVATE src)
 
+add_executable(tune_cli
+    src/tune_cli.cpp
+    src/heightmap.cpp
+    src/erosion/droplet_erosion.cpp
+    src/erosion/thermal_erosion.cpp
+    src/noise/perlin_noise.cpp
+    src/pgm.cpp
+)
+
+target_include_directories(tune_cli PRIVATE src)
+
 # GoogleTest 연동은 Phase 3에서 추가 예정 (core/tests/)
 # enable_testing()
 # add_subdirectory(tests)

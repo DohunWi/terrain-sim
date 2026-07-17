@@ -1,8 +1,7 @@
-#include "heightmap.h"
+#include "pgm.h"
 #include <fstream>
 
 void writePGM(const Heightmap& h, const std::string& filename){
-    std::ofstream out(filename);
     float minVal = h.at(0, 0);
     float maxVal = h.at(0, 0);
 
@@ -16,6 +15,12 @@ void writePGM(const Heightmap& h, const std::string& filename){
             }
         }
     }
+
+    writePGM(h, filename, minVal, maxVal);
+}
+
+void writePGM(const Heightmap& h, const std::string& filename, float minVal, float maxVal){
+    std::ofstream out(filename);
 
     // write header
     out << "P2\n";
