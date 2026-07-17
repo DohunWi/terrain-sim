@@ -14,7 +14,7 @@ C++ 코어(`core/src/net/`)와 Unity 클라이언트 사이의 v1 통신 규격.
 
 ```
 Unity                          Core
-  |── PARAMS (JSON) ──────────▶|
+  |── PARAMS (text) ───────────▶|
   |                            | 지형 생성 + 침식 실행 (동기)
   |◀── HEIGHTMAP (binary) ─────|
   |          (or ERROR)        |
@@ -39,42 +39,41 @@ Unity                          Core
 
 | 타입 | 값 | payload 형식 | 방향 |
 |---|---|---|---|
-| PARAMS | `0x01` | UTF-8 JSON | Unity → Core |
+| PARAMS | `0x01` | UTF-8 텍스트, `key=value` 줄바꿈 구분 | Unity → Core |
 | HEIGHTMAP | `0x02` | `[4바이트 width][4바이트 height][width×height×4바이트 float32, row-major]` | Core → Unity |
-| ERROR | `0x03` | UTF-8 JSON `{"error": "..."}` | Core → Unity |
+| ERROR | `0x03` | UTF-8 텍스트, `error=<메시지>` 한 줄 | Core → Unity |
 
-### PARAMS
+### PARAMS: 왜 JSON이 아니라 `key=value`인가
 
-필드 이름은 `core/src/tune_cli.cpp` / `tools/tuner_server.py`에서 이미 검증한 것과 동일하게 맞춘다 — 로컬 튜닝 도구와 실제 와이어 프로토콜의 파라미터 이름이 갈라질 이유가 없음.
+처음엔 JSON으로 설계했다가 바꿨다. PARAMS는 항상 **중첩 없는 flat key-value 뭉치**뿐이라 (객체 중첩, 배열, 유니코드 이스케이프 같은 JSON의 일반성이 전혀 필요 없음), 이 형태에 진짜 JSON 파서(+ 그걸 위한 외부 라이브러리)를 쓰는 건 과한 도구였다. 스펙이 명시한 이 프로젝트의 차별점(소켓 아키텍처/물리 엔진/성능 엔지니어링 프로세스) 중 어디에도 "JSON 파싱"은 없어서, 여기 시간 쓰는 것보다 `core/src/tune_cli.cpp`의 `--key=value` 인자 파싱과 같은 포맷을 재사용하는 쪽을 택함 — 파서도 각 줄을 `=` 기준으로 나누기만 하면 되니 라이브러리 없이 직접 짜기 부담 없음.
 
-공통 지형 생성 필드 + `sim`별 필드:
+필드 이름은 `tune_cli.cpp` / `tools/tuner_server.py`에서 이미 검증한 것과 동일하게 맞춘다 — 로컬 튜닝 도구와 실제 와이어 프로토콜의 파라미터 이름이 갈라질 이유가 없음.
 
-```json
-{
-  "sim": "droplet",
-  "width": 64,
-  "height": 64,
-  "terrainSeed": 42,
-  "scale": 10.0,
-  "octaves": 3,
-  "persistence": 0.5,
-  "lacunarity": 2.0,
+공통 지형 생성 필드 + `sim`별 필드, 한 줄에 하나씩 `key=value`, `\n`으로 구분:
 
-  "numDroplets": 700,
-  "dropletSeed": 42,
-  "inertia": 0.3,
-  "minSlope": 0.01,
-  "capacityFactor": 4.0,
-  "erosionFactor": 0.3,
-  "depositFactor": 0.3,
-  "gravity": 4.0,
-  "evaporateRate": 0.02,
-  "waterThreshold": 0.01,
-  "maxLifeTime": 25
-}
+```
+sim=droplet
+width=64
+height=64
+terrainSeed=42
+scale=10.0
+octaves=3
+persistence=0.5
+lacunarity=2.0
+numDroplets=700
+dropletSeed=42
+inertia=0.3
+minSlope=0.01
+capacityFactor=4.0
+erosionFactor=0.3
+depositFactor=0.3
+gravity=4.0
+evaporateRate=0.02
+waterThreshold=0.01
+maxLifeTime=25
 ```
 
-`sim: "thermal"`이면 `numDroplets`~`maxLifeTime` 대신 `talusAngle`, `erosionRate`, `iterations`가 들어간다 (`tuner_server.py`의 `SIM_PARAMS["thermal"]`과 동일).
+`sim=thermal`이면 `numDroplets`~`maxLifeTime` 대신 `talusAngle`, `erosionRate`, `iterations`가 들어간다 (`tuner_server.py`의 `SIM_PARAMS["thermal"]`과 동일).
 
 ### HEIGHTMAP
 
@@ -82,7 +81,7 @@ Unity                          Core
 
 ### ERROR
 
-`sim` 값이 `droplet`/`thermal`이 아니거나, JSON 파싱 실패 등 코어가 요청을 처리 못 했을 때. `tune_cli.cpp`가 이미 알 수 없는 `--sim=`에 대해 stderr + 종료코드 1로 실패하는 것과 같은 상황을 소켓 위에서 표현한 것.
+`sim` 값이 `droplet`/`thermal`이 아니거나, 파싱 실패 등 코어가 요청을 처리 못 했을 때. `tune_cli.cpp`가 이미 알 수 없는 `--sim=`에 대해 stderr + 종료코드 1로 실패하는 것과 같은 상황을 소켓 위에서 표현한 것. 예: `error=unknown sim 'foo' (expected droplet or thermal)`
 
 ## 다음 단계
 
