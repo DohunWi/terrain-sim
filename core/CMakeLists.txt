@@ -17,6 +17,7 @@ add_executable(terrain_sim_core
     src/erosion/thermal_erosion.cpp
     src/noise/perlin_noise.cpp
     src/pgm.cpp
+    src/erosion/droplet_erosion.cpp
 )
 
 target_include_directories(terrain_sim_core PRIVATE src)
