@@ -18,6 +18,8 @@ add_executable(terrain_sim_core
     src/noise/perlin_noise.cpp
     src/pgm.cpp
     src/erosion/droplet_erosion.cpp
+    src/net/socket.cpp
+    src/net/tcp_server.cpp
 )
 
 target_include_directories(terrain_sim_core PRIVATE src)
