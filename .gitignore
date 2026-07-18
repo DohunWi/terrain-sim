@@ -26,6 +26,7 @@ unity-client/MemoryCaptures/
 unity-client/UserSettings/
 unity-client/*.csproj
 unity-client/*.sln
+unity-client/*.slnx
 unity-client/.vs/
 
 # --- Editor / OS ---
