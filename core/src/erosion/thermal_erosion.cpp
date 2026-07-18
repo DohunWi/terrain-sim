@@ -1,5 +1,5 @@
 #include "thermal_erosion.h"
-#include <vector>;
+#include <vector>
 
 std::vector<LowestNeighbor> findLowestNeighbor(const Heightmap& h, int x, int y) {
     std::vector<LowestNeighbor> candidates;
