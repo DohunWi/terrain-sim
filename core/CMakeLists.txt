@@ -20,6 +20,9 @@ add_executable(terrain_sim_core
     src/erosion/droplet_erosion.cpp
     src/net/socket.cpp
     src/net/tcp_server.cpp
+    src/net/io.cpp
+    src/net/protocol.cpp
+    src/net/params.cpp
 )
 
 target_include_directories(terrain_sim_core PRIVATE src)
