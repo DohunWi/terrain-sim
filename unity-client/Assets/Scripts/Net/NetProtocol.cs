@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace TerrainSim.Net
@@ -7,6 +8,7 @@ namespace TerrainSim.Net
         Params = 0x01,
         Heightmap = 0x02,
         Error = 0x03,
+        HeightmapDone = 0x04,
     }
 
     public struct Envelope
@@ -69,6 +71,25 @@ namespace TerrainSim.Net
                     throw new IOException("connection closed while reading");
                 done += read;
             }
+        }
+
+        // core/src/net/protocol.cpp가 std::bit_cast로 float 비트를 그대로 옮기는 것과
+        // 대칭되는 디코딩 -- HeightmapData가 이걸 써서 float32 배열을 디코드한다.
+        public static uint ReadUInt32LE(byte[] buf, int offset)
+        {
+            return (uint)buf[offset]
+                 | ((uint)buf[offset + 1] << 8)
+                 | ((uint)buf[offset + 2] << 16)
+                 | ((uint)buf[offset + 3] << 24);
+        }
+
+        public static float ReadFloatLE(byte[] buf, int offset)
+        {
+            // BitConverter.ToSingle 대신: 이미 명시적으로 조립한 uint 비트를
+            // 재해석하는 것뿐이라 호스트 엔디안(BitConverter.IsLittleEndian)에
+            // 의존하지 않는다 -- core/src/net/protocol.cpp의 std::bit_cast와 대응.
+            uint bits = ReadUInt32LE(buf, offset);
+            return BitConverter.Int32BitsToSingle((int)bits);
         }
     }
 }
