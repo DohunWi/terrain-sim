@@ -9,6 +9,7 @@ enum class MessageType : uint8_t {
     Params = 0x01,
     Heightmap = 0x02,
     Error = 0x03,
+    HeightmapDone = 0x04,
 };
 
 struct Envelope{

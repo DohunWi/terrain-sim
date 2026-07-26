@@ -16,23 +16,37 @@ C++ 코어(`core/src/net/`)와 Unity 클라이언트 사이의 v1 통신 규격.
 - **Unity가 클라이언트**로 접속한다.
 - 연결은 유지한 채로 여러 번의 요청-응답 사이클을 반복한다 (매번 재접속하지 않음).
 
-## 통신 모델: request-response
+## 통신 모델: request-response, 응답은 N개의 HEIGHTMAP + 종료 마커
 
-침식마다 계속 스트리밍하지 않고, Unity가 파라미터를 보낼 때만 코어가 한 번 시뮬레이션을 동기 실행하고 결과를 돌려준다.
+Unity가 PARAMS를 하나 보내면, 코어는 그 요청 하나에 대해 **HEIGHTMAP을 한 번 이상 순서대로 여러 번** 보내고 마지막에 HEIGHTMAP_DONE(또는 실패 시 ERROR)으로 마무리한다. 매 프레임 계속 쏟아지는 진짜 스트리밍은 아니고(Unity가 다음 PARAMS를 보내기 전까진 코어가 먼저 아무것도 안 보냄), 한 번의 요청-응답 "사이클" 안에서 여러 프레임이 오가는 구조다.
 
 ```
 Unity                          Core
   |── PARAMS (text) ───────────▶|
-  |                            | 지형 생성 + 침식 실행 (동기)
-  |◀── HEIGHTMAP (binary) ─────|
-  |          (or ERROR)        |
+  |                            | 지형 생성, 침식을 조금씩(batch) 실행
+  |◀── HEIGHTMAP (snapshot 1) ─|
+  |◀── HEIGHTMAP (snapshot 2) ─|
+  |◀── HEIGHTMAP (snapshot N) ─|
+  |◀── HEIGHTMAP_DONE ─────────|
+  |          (or ERROR, 중간에 실패하면 스냅샷 없이 바로) |
   |                            |
   |── PARAMS (다음 조정) ──────▶|
-  |◀── HEIGHTMAP ───────────────|
-  ...
+  |◀── ...                     |
 ```
 
-파라미터 슬라이더를 만질 때마다 새 PARAMS를 보내고, 그때마다 전체 heightmap을 다시 받는 식. 처음부터 스트리밍/증분 갱신으로 가지 않는 이유는 v1을 최대한 단순하게 유지해서, 나중에 실제로 느릴 때 "측정 → 병목 특정 → 개선" 과정을 documenting하기 위함 (스펙 §8 리스크 대응 순서와 동일한 논리).
+### 왜 이렇게 바뀌었나 — 침식 알고리즘 코드는 안 건드리고 애니메이션을 보여주는 법
+
+처음엔 요청당 HEIGHTMAP 한 개(최종 결과만)였는데, 침식이 실제로 "진행되는" 과정을 보고 싶어서 이 구조로 바꿨다. 아래 두 방법은 택하지 않은 이유:
+
+- **클라이언트 쪽 보간(lerp)**: 이전 결과와 새 결과 사이를 Unity에서 시간에 따라 섞는 방법. 프로토콜/코어 변경이 전혀 없어 제일 쉽지만, 실제 물리 과정이 아니라 "모양이 스르륵 바뀌는" 것처럼 보여 침식 시뮬레이션의 포인트(디테일이 실제로 패이는 과정)를 못 보여줌.
+- **erosion 함수에 콜백 추가**: `thermalErode`/`dropletErode` 내부에서 매 iteration/droplet마다 콜백을 호출하게 만드는 방법. 진짜 세밀한 애니메이션이 가능하지만, 이 함수들은 `CLAUDE.md`가 명시한 "알고리즘 코드는 사용자가 직접 작성" 대상이라 — 콜백 추가 자체는 물리 로직을 안 바꾸는 계측(instrumentation)에 가깝긴 해도, 그 경계를 굳이 건드릴 이유가 없었음.
+
+**택한 방법**: `main.cpp`가 같은 `Heightmap&`를 두고 erosion 함수를 **여러 번, 조금씩** 호출한다.
+
+- `thermalErode`는 완전히 결정론적(랜덤 없음)이라, `thermalErode(h, talus, rate, 1)`을 N번 연달아 호출하는 것과 `thermalErode(h, talus, rate, N)`을 한 번 호출하는 게 수학적으로 완전히 동일하다. 매 호출 뒤 스냅샷을 보내면 진짜 침식 과정을 한 스텝씩 그대로 보여주는 것.
+- `dropletErode`는 seed로 난수를 쓰지만, 매 배치(batch)마다 다른 seed로 소량씩(`numDroplets / snapshotCount`) 호출하면 각 배치는 **그 시점의 실제 지형 위에서** 흐르는 진짜 새 드롭릿들이다. "seed 하나로 이어지는 단일 스트림"은 아니지만, 매 배치가 그 순간의 진짜 물리 시뮬레이션이라는 점은 같다.
+
+결과: `core/src/erosion/`의 함수 시그니처·내부 로직은 **한 줄도 안 바뀐다**. `main.cpp`(배선 코드)가 기존 함수를 반복 호출하는 방식만 바뀐 것.
 
 ## 메시지 envelope (공통)
 
@@ -50,6 +64,9 @@ Unity                          Core
 | PARAMS | `0x01` | UTF-8 텍스트, `key=value` 줄바꿈 구분 | Unity → Core |
 | HEIGHTMAP | `0x02` | `[4바이트 width][4바이트 height][width×height×4바이트 float32, row-major]` | Core → Unity |
 | ERROR | `0x03` | UTF-8 텍스트, `error=<메시지>` 한 줄 | Core → Unity |
+| HEIGHTMAP_DONE | `0x04` | payload 없음(길이 0) | Core → Unity |
+
+`HEIGHTMAP_DONE`은 "이번 PARAMS에 대한 HEIGHTMAP 스트림이 끝났다"는 신호일 뿐이라 payload가 필요 없다 — envelope의 길이 필드가 그냥 0이 된다. Unity는 `HEIGHTMAP_DONE` 또는 `ERROR`를 받을 때까지 `HEIGHTMAP`을 계속 받아들이고, 받을 때마다 메시를 갱신한다(마지막 HEIGHTMAP이 곧 최종 결과이므로 별도 처리 불필요).
 
 ### PARAMS: 왜 JSON이 아니라 `key=value`인가
 
@@ -68,6 +85,7 @@ scale=10.0
 octaves=3
 persistence=0.5
 lacunarity=2.0
+snapshotCount=12
 numDroplets=700
 dropletSeed=42
 inertia=0.3
@@ -82,6 +100,8 @@ maxLifeTime=25
 ```
 
 `sim=thermal`이면 `numDroplets`~`maxLifeTime` 대신 `talusAngle`, `erosionRate`, `iterations`가 들어간다 (`tuner_server.py`의 `SIM_PARAMS["thermal"]`과 동일).
+
+`snapshotCount`(공통 필드, 기본 12)는 이번 요청에서 몇 개의 중간 HEIGHTMAP 스냅샷을 보낼지 정한다 — `thermal`이면 최대 `min(iterations, snapshotCount)`번, `droplet`이면 `numDroplets`를 `snapshotCount`개 배치로 나눠서 그만큼 보낸다.
 
 ### HEIGHTMAP
 

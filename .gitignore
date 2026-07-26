@@ -9,6 +9,7 @@ Testing/
 Makefile
 cmake_install.cmake
 compile_commands.json
+.cache/
 *.o
 *.obj
 *.exe
