@@ -12,45 +12,6 @@ struct Droplet{
     float water;
     float sediment;
 };
-struct HeightSample {
-      float height;
-      float tx;
-      float ty;
-      float gradX;
-      float gradY;
-};
-
-static float lerp(float a, float b, float t){
-    float result;
-    result = a*(1-t) + b*t;
-    return result;
-}
-static HeightSample sampleHeightAndGradient(Heightmap& hm, float x, float y){
-    int x0 = floor(x);
-    int x1 = x0 +1;
-    int y0 = floor(y);
-    int y1 = y0 + 1;
-    float tx = x - x0;
-    float ty = y - y0;
-
-    float h00 = hm.at(x0,y0);
-    float h10 = hm.at(x1,y0);
-    float h01 = hm.at(x0,y1);
-    float h11 = hm.at(x1,y1);
-
-    float bottom = lerp(h00, h10, tx);
-    float top = lerp(h01, h11, tx);
-    float result= lerp(bottom, top, ty);
-
-    HeightSample hs;
-    hs.tx = tx;
-    hs.ty = ty;
-    hs.height = result;
-    hs.gradX = lerp(h10 - h00, h11 - h01, ty);
-    hs.gradY = lerp(h01 - h00, h11 - h10, tx);
-
-    return hs;
-}
 static void erode(Heightmap& hm, float x, float y, float erodeAmount, float tx, float ty){
     int x0 = floor(x);
     int x1 = x0 +1;
@@ -75,7 +36,7 @@ static void deposit(Heightmap& hm, float x, float y, float depositAmount, float 
 }
 
 static int dropletStep(Heightmap& hm, Droplet& droplet, const ErosionParams& params){
-    HeightSample hs = sampleHeightAndGradient(hm, droplet.posX, droplet.posY);
+    HeightSample hs = hm.sample(droplet.posX, droplet.posY);
     float previousX = droplet.posX;
     float previousY = droplet.posY;
 
@@ -103,7 +64,7 @@ static int dropletStep(Heightmap& hm, Droplet& droplet, const ErosionParams& par
         return 0;
     }
 
-    HeightSample nextHs = sampleHeightAndGradient(hm,  droplet.posX, droplet.posY);
+    HeightSample nextHs = hm.sample(droplet.posX, droplet.posY);
     float deltaHeight = nextHs.height - hs.height;
     float capacity = std::max(-deltaHeight, params.minSlope) * droplet.speed * droplet.water * params.capacityFactor;
 
