@@ -23,6 +23,7 @@ add_executable(terrain_sim_core
     src/net/io.cpp
     src/net/protocol.cpp
     src/net/params.cpp
+    src/physics/rigid_body.cpp
 )
 
 target_include_directories(terrain_sim_core PRIVATE src)
@@ -37,6 +38,15 @@ add_executable(tune_cli
 )
 
 target_include_directories(tune_cli PRIVATE src)
+
+add_executable(physics_test
+    src/physics_test.cpp
+    src/heightmap.cpp
+    src/noise/perlin_noise.cpp
+    src/physics/rigid_body.cpp
+)
+
+target_include_directories(physics_test PRIVATE src)
 
 # GoogleTest 연동은 Phase 3에서 추가 예정 (core/tests/)
 # enable_testing()
