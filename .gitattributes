@@ -1,0 +1,6 @@
+# unity-client/는 시각화용 thin client이고, 이 레포의 실제 작업은 core/의 C++
+# 시뮬레이션 코어다 (CLAUDE.md 참고). Unity 프로젝트는 .meta/.asset 등 자동
+# 생성 보일러플레이트가 바이트 수 기준으로 훨씬 커서, 그냥 두면 GitHub 언어
+# 통계가 C# 위주로 왜곡된다. linguist-vendored로 표시해서 통계에서만 빼고
+# (파일 추적/브라우징에는 영향 없음) 실제 C++ 작업이 드러나게 한다.
+unity-client/** linguist-vendored
