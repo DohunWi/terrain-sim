@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 
 #include "heightmap.h"
@@ -50,6 +51,38 @@ int main() {
         stepRigidBody(projectile, terrain, gravity, pushForce, dt);
         std::cout << i << ". x=" << projectile.position.x << " y=" << projectile.position.y << "\n";
     }
+
+    // 에너지 보존 검증: erosion의 mass-conservation 체크에 해당하는 물리 버전.
+    // 자유낙하 중엔 KE+PE가 거의 일정해야 하고 (semi-implicit Euler의 적분
+    // 오차만큼만 흔들려야 함), 지형과 충돌해 법선 성분을 버리는 순간엔
+    // KE가 줄어드는 게 정상(비탄성 충돌 모델)이라 총 에너지가 늘어나는 일은
+    // 절대 없어야 한다. 늘어난다면 적분/충돌 로직에 실제 버그가 있다는 뜻.
+    std::cout << "\n--- test 3: energy conservation ---\n";
+    RigidBody dropTest;
+    dropTest.position = Vec3{20.0f, 5.0f, 20.0f};
+    dropTest.velocity = Vec3{0.0f, 0.0f, 0.0f};
+    dropTest.mass = 1.0f;
+
+    const float g = 9.8f;  // gravity 벡터의 크기, PE = m*g*h 계산용
+    double initialEnergy = 0.0;
+    double maxEnergy = -1e18;
+    double minEnergy = 1e18;
+
+    for (int i = 0; i < 300; ++i) {
+        stepRigidBody(dropTest, terrain, gravity, noForce, dt);
+        double ke = 0.5 * dropTest.mass * dot(dropTest.velocity, dropTest.velocity);
+        double pe = dropTest.mass * g * dropTest.position.y;
+        double totalEnergy = ke + pe;
+        if (i == 0) initialEnergy = totalEnergy;
+        maxEnergy = std::max(maxEnergy, totalEnergy);
+        minEnergy = std::min(minEnergy, totalEnergy);
+        std::cout << i << ". KE=" << ke << " PE=" << pe << " total=" << totalEnergy << "\n";
+    }
+
+    std::cout << "\ninitial total energy: " << initialEnergy
+               << ", max: " << maxEnergy
+               << ", min: " << minEnergy << "\n";
+    std::cout << "max increase above initial: " << (maxEnergy - initialEnergy) << "\n";
 
     return 0;
 }

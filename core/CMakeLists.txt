@@ -24,6 +24,7 @@ add_executable(terrain_sim_core
     src/net/protocol.cpp
     src/net/params.cpp
     src/physics/rigid_body.cpp
+    src/physics/vec3.cpp
 )
 
 target_include_directories(terrain_sim_core PRIVATE src)
@@ -44,6 +45,7 @@ add_executable(physics_test
     src/heightmap.cpp
     src/noise/perlin_noise.cpp
     src/physics/rigid_body.cpp
+    src/physics/vec3.cpp
 )
 
 target_include_directories(physics_test PRIVATE src)
