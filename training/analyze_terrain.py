@@ -78,7 +78,8 @@ def main() -> None:
     parser.add_argument("--n-terrains", type=int, default=100)
     parser.add_argument("--seed-start", type=int, default=0)
     parser.add_argument("--out", type=pathlib.Path,
-                         default=pathlib.Path("../benchmarks/evaluations/terrain_difficulty.json"))
+                         default=pathlib.Path(
+                             "../benchmarks/evaluations/terrain-defaults__analysis-terrain-difficulty__seeds-0-99.json"))
     parser.add_argument("--scale", type=float, default=None)
     parser.add_argument("--octaves", type=int, default=None)
     parser.add_argument("--persistence", type=float, default=None)

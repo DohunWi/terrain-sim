@@ -26,18 +26,21 @@ cd core && cmake -S . -B build && cmake --build build --target terrain_sim_py
 # training/에서 실행 (env.py가 core/build/python을 자동으로 sys.path에 추가함)
 cd ../training
 /Users/widohun/miniconda3/bin/python3 train.py --timesteps 1000000 --seed 0 \
-  --out artifacts/b0/model --log-dir artifacts/b0/logs --tb-log-dir artifacts/b0/tb_logs \
-  --run-name b0 --experiment-id b0
+  --out artifacts/baseline-l2cap-fmax5/model \
+  --log-dir artifacts/baseline-l2cap-fmax5/logs \
+  --tb-log-dir artifacts/baseline-l2cap-fmax5/tb_logs \
+  --run-name baseline-l2cap-fmax5 --experiment-id baseline-l2cap-fmax5
 ```
 
 `train.py`는 모델과 함께 `<out 디렉터리>/meta.json`을 자동으로 쓴다 — training seed/steps, PPO 하이퍼파라미터(모델 객체에서 실제 값을 읽음, 하드코딩 아님), env 상수 전부, 그리고 그 시점의 git commit SHA(+dirty 여부). `eval.py`는 이 파일을 자동으로 읽어서 **학습 때와 똑같은 env 설정으로** 평가한다 — 실수로 다른 파라미터로 평가하는 걸 막는 안전장치.
 
 ## 학습 진행 모니터링 (TensorBoard)
 
-`train.py`는 `--tb-log-dir`(실험별로 분리 권장, 예: `artifacts/b0/tb_logs`)에 스칼라 로그를 남긴다. 물리를 매 스텝 렌더링하는 게 아니라 `ep_rew_mean`/`ep_len_mean` 같은 숫자만 기록하는 거라 학습 자체를 늦추지 않는다.
+`train.py`는 `--tb-log-dir`(실험별로 분리 권장, 예: `artifacts/baseline-l2cap-fmax5/tb_logs`)에 스칼라 로그를 남긴다. 물리를 매 스텝 렌더링하는 게 아니라 `ep_rew_mean`/`ep_len_mean` 같은 숫자만 기록하는 거라 학습 자체를 늦추지 않는다.
 
 ```bash
-/Users/widohun/miniconda3/bin/python3 -m tensorboard.main --logdir artifacts/b0/tb_logs --port 6006
+/Users/widohun/miniconda3/bin/python3 -m tensorboard.main \
+  --logdir artifacts/baseline-l2cap-fmax5/tb_logs --port 6006
 # http://localhost:6006 에서 SCALARS 탭
 ```
 
@@ -46,17 +49,19 @@ cd ../training
 `eval.py`는 고정 seed 집합(D20: 1000~1019, V100: 2000~2099, T100: 3000~3099 — `docs/evaluation-protocol.md` §2)을 deterministic하게 굴려서 성공/맵 이탈/시간초과, 경사각 통계, return 등을 집계한다. `--controller`로 학습된 PPO 정책뿐 아니라 direct-to-goal/random baseline도 같은 코드 경로로 평가 가능(§5). `--experiment-id`는 필수 — 결과 파일의 1차 식별자는 파일 경로가 아니라 이 ID.
 
 ```bash
-/Users/widohun/miniconda3/bin/python3 eval.py --model artifacts/b0/model --controller ppo \
-  --episodes 100 --seed-start 2000 --experiment-id b0_v100_ppo \
-  --out ../benchmarks/evaluations/b0_v100_ppo.json
+/Users/widohun/miniconda3/bin/python3 eval.py \
+  --model artifacts/baseline-l2cap-fmax5/model --controller ppo \
+  --episodes 100 --seed-start 2000 --experiment-id baseline-l2cap-fmax5 \
+  --out ../benchmarks/evaluations/baseline-l2cap-fmax5__train-s0__eval-val100__controller-ppo.json
 ```
 
 `--dump-trajectory <path>`를 추가하면 평가한 모든 에피소드의 지형+궤적+결과를 유니티가 읽을 수 있는 JSON으로도 저장한다 (`unity-client/Assets/Scripts/Replay/TrajectoryReplay.cs`가 소비 — 소켓 없는 정적 파일 로딩, `core/src/net/`과 무관). 예:
 
 ```bash
-/Users/widohun/miniconda3/bin/python3 eval.py --model artifacts/b0/model --episodes 20 \
-  --experiment-id b0_d20_unity \
-  --dump-trajectory ../unity-client/Assets/StreamingAssets/replay.json
+/Users/widohun/miniconda3/bin/python3 eval.py \
+  --model artifacts/baseline-l2cap-fmax5/model --episodes 20 \
+  --experiment-id baseline-l2cap-fmax5 \
+  --dump-trajectory ../unity-client/Assets/StreamingAssets/baseline-l2cap-fmax5__eval-dev20__replay.json
 ```
 
 유니티 씬에 빈 GameObject 만들어서 `TrajectoryReplay` 컴포넌트 붙이면 왼쪽에 에피소드 목록(초록=성공/빨강=맵 이탈/노랑=시간초과)이 뜨고 클릭해서 원하는 에피소드를 재생할 수 있다.
@@ -76,13 +81,13 @@ cd ../training
 ## 확인된 것
 
 - `check_env` 통과, 시드 재현성 확인(지형·start/goal·random controller baseline 전부 포함).
-- `b0_legacy`(축별 action clip 버그 있던 상태, `F_MAX=5.0`): D20 55% 성공, 40% 맵 이탈.
-- `b0`(L2-norm clip 수정 후, `F_MAX=5.0`): D20 65% 성공/20% 이탈. **V100 100 에피소드**: PPO 64% 성공, direct-to-goal 33%, random 0% — PPO가 direct보다 일관되게 우수함을 확인(프로토콜 §10 채택 기준 중 하나 충족).
-- **지형 난이도 분석(`analyze_terrain.py`) 결과, `b0` 당시 파라미터(`F_MAX=5.0`, `theta_max=27.0°`)로는 가파른 셀이 0%** — 100개 지형 최대 경사가 14.3°. `F_MAX`가 물리적으로 발동한 적이 없어 사실상 평면 navigation이었음이 드러남. `SCALE`은 경사 분포에 거의 영향 없고(원본 노이즈 자체 최대 경사가 24.8°로 `theta_max` 아래), `F_MAX`를 낮추는 쪽으로 재보정 — **`F_MAX=2.0`(theta_max≈11.5°)/`TALUS_ANGLE=0.15`로 확정** (직선 경로 56% 차단, 100% 우회 가능). 지금 `env.py`의 클래스 기본값이 이 값.
-- `b1`(`F_MAX=2.0`/`TALUS_ANGLE=0.15`, `MAX_STEPS=500` 그대로): D20 30% 성공, 55% 시간초과로 급증 — 힘이 약해지며 순수 이동 자체가 느려졌는데 시간 예산은 그대로였던 게 원인.
-- `b2`(`MAX_STEPS=1000`으로 조정): 시간초과는 5%로 해소됐지만 **맵 이탈이 75%로 폭증**, 성공률 20%로 오히려 하락 — `b0`에서도 이미 있던 맵 이탈(observation에 경계 정보 부재로 추정)이 지금은 지배적 실패 유형. `MAX_STEPS=1000`도 확정된 기본값.
+- `baseline-axis-cap-fmax5`(축별 action clip 버그가 있던 상태): D20 55% 성공, 40% 맵 이탈. 현재 protocol에서는 superseded 상태다.
+- `baseline-l2cap-fmax5`(L2-norm clip 수정 후): D20 65% 성공/20% 이탈. **V100 100 에피소드**: PPO 64% 성공, direct-to-goal 33%, random 0%.
+- **지형 난이도 분석 결과, `baseline-l2cap-fmax5`에서는 가파른 셀이 0%** — 100개 지형 최대 경사가 14.3°인데 `theta_max=27.0°`라 사실상 평면 navigation이었음이 드러났다.
+- `explore-fmax2-talus015-steps500`: 지형 결합 후보를 찾기 위해 `F_MAX=2.0`, `TALUS_ANGLE=0.15`를 함께 적용한 탐색 실행. 직선 경로 56% 차단, 100% 우회 가능이었지만 D20 성공 30%, 시간초과 55%였다. 두 변수를 함께 바꿨으므로 정식 단일 변수 실험이 아니다.
+- `env-maxsteps1000-fmax2`: 위 탐색 조건에서 `MAX_STEPS`만 1000으로 늘린 실행. 시간초과는 5%로 줄었지만 맵 이탈 75%, 성공 20%였다.
 - 세부 수치는 `benchmarks/evaluations/*.json` 참고.
 
 ## 아직 없음
 
-지형을 실제로 막히게 만드는 파라미터 탐색(재학습 전, `analyze_terrain.py`로 스캔) → `b0` 재학습 → observation(E1 경계 거리 등)/reward 튜닝 → Phase 2c 성능 벤치마크.
+현재 직진 가속·제동 실패 trajectory를 정식 experiment 문서로 기록 → reward/제어 가설을 단일 변수로 검증 → 필요성이 입증된 경우에만 observation 변경 → Phase 2c 성능 벤치마크.

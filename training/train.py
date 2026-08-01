@@ -1,11 +1,28 @@
 """stable-baselines3 PPO training entry point for TerrainAgentEnv.
 
-Writes <out>.meta.json alongside the saved model with everything
-docs/evaluation-protocol.md §1 requires to make a run reproducible/comparable:
-training seed, total steps, PPO hyperparameters, env constants, and the repo
-commit SHA (+ dirty flag) at training time.
+Writes <out>'s parent directory/meta.json alongside the saved model with
+everything docs/evaluation-protocol.md §1 requires to make a run
+reproducible/comparable: training seed, total steps, PPO hyperparameters, env
+constants, and the repo commit SHA (+ dirty flag) at training time.
 
-tensorborad /Users/widohun/miniconda3/bin/python3 -m tensorboard.main --logdir artifacts --port 6006
+Usage (run from training/ with the conda Python documented in training/README.md):
+
+    # Train a new experiment. Keep model, Monitor log, TensorBoard log, and
+    # metadata together under a fresh semantic experiment ID; do not overwrite prior runs.
+    /Users/widohun/miniconda3/bin/python3 train.py \
+        --timesteps 1000000 --seed 0 \
+        --out artifacts/<experiment-id>/model \
+        --log-dir artifacts/<experiment-id>/logs \
+        --tb-log-dir artifacts/<experiment-id>/tb_logs \
+        --run-name <experiment-id> --experiment-id <experiment-id>
+
+    # Monitor training scalars in another terminal.
+    /Users/widohun/miniconda3/bin/python3 -m tensorboard.main \
+        --logdir artifacts/<experiment-id>/tb_logs --port 6006
+
+Environment override flags (for example --f-max or --max-steps) define a new
+experiment condition. Leave them unset for the current class baseline, and
+change only one variable category at a time per docs/evaluation-protocol.md §3.
 """
 
 from __future__ import annotations

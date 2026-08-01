@@ -1,6 +1,6 @@
 {
-  "experiment_id": "b0_v100_ppo",
-  "model_path": "/Users/widohun/terrain-sim/training/artifacts/b0/model",
+  "experiment_id": "baseline-l2cap-fmax5",
+  "model_path": "/Users/widohun/terrain-sim/training/artifacts/baseline-l2cap-fmax5/model",
   "controller": "ppo",
   "seed_range": [
     2000,
@@ -27,7 +27,7 @@
     "OUT_OF_BOUNDS_PENALTY": 10.0
   },
   "training_metadata": {
-    "experiment_id": "b0",
+    "experiment_id": "baseline-l2cap-fmax5",
     "training_seed": 0,
     "total_timesteps": 1000000,
     "ppo_hyperparams": {

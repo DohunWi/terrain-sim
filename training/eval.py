@@ -6,6 +6,25 @@ fields and aggregate metrics protocol §3/§4 require, and optionally writes
 them to a structured JSON under benchmarks/evaluations/. Trajectory+heightmap
 dumps for Unity replay (protocol §11: not committed, local-only) stay a
 separate opt-in flag.
+
+Usage (run from training/ with the conda Python documented in training/README.md):
+
+    # D20: evaluate one semantic experiment and save a reproducible result.
+    /Users/widohun/miniconda3/bin/python3 eval.py \
+        --model artifacts/env-maxsteps1000-fmax2/model --controller ppo \
+        --episodes 20 --seed-start 1000 --experiment-id env-maxsteps1000-fmax2 \
+        --out ../benchmarks/evaluations/env-maxsteps1000-fmax2__train-s0__eval-dev20__controller-ppo.json
+
+    # D20 + Unity replay: dump every episode, then select an OUT_OF_BOUNDS
+    # episode from TrajectoryReplay's on-screen list in the Unity Editor.
+    /Users/widohun/miniconda3/bin/python3 eval.py \
+        --model artifacts/env-maxsteps1000-fmax2/model --controller ppo \
+        --episodes 20 --seed-start 1000 --experiment-id env-maxsteps1000-fmax2 \
+        --dump-trajectory ../unity-client/Assets/StreamingAssets/env-maxsteps1000-fmax2__eval-dev20__replay.json
+
+--model may omit the .zip suffix. eval.py reads the adjacent meta.json by
+default, so the policy is evaluated using its training-time environment constants;
+do not pass environment override flags for this like-for-like diagnosis.
 """
 
 from __future__ import annotations
@@ -147,15 +166,16 @@ def summarize(records: list[dict]) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=pathlib.Path, default=pathlib.Path("artifacts/b0/model"))
+    parser.add_argument("--model", type=pathlib.Path,
+                        default=pathlib.Path("artifacts/baseline-l2cap-fmax5/model"))
     parser.add_argument("--controller", choices=["ppo", "direct", "random"], default="ppo")
     parser.add_argument("--episodes", type=int, default=20)
     parser.add_argument("--seed-start", type=int, default=1000)
     parser.add_argument("--dump-trajectory", type=pathlib.Path, default=None,
                          help="also write every episode's terrain+trajectory (Unity replay JSON)")
     parser.add_argument("--experiment-id", type=str, required=True,
-                         help="tag stored in the output JSON, e.g. b0_v100 -- the primary identifier "
-                              "for this result, since --model's path meaning depends on cwd")
+                         help="semantic condition ID stored in the output JSON, "
+                              "e.g. baseline-l2cap-fmax5")
     parser.add_argument("--out", type=pathlib.Path, default=None,
                          help="write structured results to this path under benchmarks/evaluations/")
     # Env overrides: default to the model's own training config (meta.json,
