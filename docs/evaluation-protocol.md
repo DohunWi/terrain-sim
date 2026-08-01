@@ -10,7 +10,7 @@
 C++ physics → pybind11 → Gymnasium → PPO → deterministic evaluation → Unity replay
 ```
 
-환경 또는 물리를 변경하기 전 현재 모델과 설정을 baseline으로 고정한다. 실험 ID는 `b0`, `e1_boundary_obs`, `p1_fmax4`처럼 설정과 결과를 연결할 수 있게 붙인다.
+환경 또는 물리를 변경하기 전 현재 모델과 설정을 baseline으로 고정한다. 실험 ID는 `baseline-l2cap`, `reward-oob-50`, `physics-fmax-4`처럼 이름만 보고 변경 목적을 알 수 있게 붙인다.
 
 각 baseline/실험에는 최소한 다음 정보를 기록한다.
 
@@ -21,7 +21,7 @@ C++ physics → pybind11 → Gymnasium → PPO → deterministic evaluation → 
 - 평가 seed 집합
 - 성공·맵 이탈·시간초과 결과
 
-기존의 축별 action 제한으로 학습된 모델은 `b0_legacy`로 보존한다. action을 L2 norm 기준으로 제한한 뒤 다시 학습한 모델부터 정식 `b0`로 사용한다.
+기존의 축별 action 제한으로 학습된 모델은 `baseline-axis-cap-legacy`로 보존한다. action을 L2 norm 기준으로 제한한 뒤 다시 학습한 모델은 `baseline-l2cap`으로 사용한다.
 
 ## 2. Seed 집합 분리
 
@@ -146,21 +146,22 @@ angle = atan(slope)
 
 ## 9. 튜닝 순서
 
-1. `b0_legacy` 결과와 아티팩트 보존
-2. action L2 norm 제한 적용 후 정식 `b0` 재학습
-3. B0를 V100에서 평가
+1. `baseline-axis-cap-legacy` 결과와 아티팩트 보존
+2. action L2 norm 제한 적용 후 `baseline-l2cap` 재학습
+3. `baseline-l2cap`을 V100에서 평가
 4. 지형 경사 분포와 경로 가능성 분석
 5. Random/Direct-to-goal/PPO baseline 비교
-6. 경계 거리 observation 실험
-7. 필요할 때만 observation 정규화와 lookahead 실험
-8. observation을 고정한 뒤 reward 실험
-9. 물리 자동 테스트 완료
-10. `F_MAX` 4/5/6 sweep
-11. 최종 설정 선택
-12. training seed 0/1/2로 각각 재학습
-13. T100 최종 평가
-14. 대표 성공·우회·실패 trajectory를 Unity에서 재생
-15. 설정을 고정한 뒤 Phase 2c 처리량 프로파일링과 병렬화 진행
+6. baseline trajectory에서 제동·방향 전환·이탈 실패 원인 분석
+7. 물리 자동 테스트 완료
+8. 지형 결합이 약하면 `F_MAX` 또는 terrain 난이도를 단일 변수로 조정
+9. 실패한 직진도 높은 return을 받는지 확인하고 reward 실험
+10. 필요할 때만 observation 정규화와 lookahead 실험
+11. 경계 정보 부족이 원인으로 입증된 경우에만 제한적 경계 센서 실험
+12. 최종 설정 선택
+13. training seed 0/1/2로 각각 재학습
+14. T100 최종 평가
+15. 대표 성공·우회·실패 trajectory를 Unity에서 재생
+16. 설정을 고정한 뒤 Phase 2c 처리량 프로파일링과 병렬화 진행
 
 ## 10. 최종 채택 기준
 
@@ -193,3 +194,249 @@ Git에 포함하지 않는다.
 - 대량의 replay 파일
 
 모델과 raw log는 `training/artifacts/<experiment-id>/` 같은 로컬 디렉터리에 실험 ID별로 보관한다. Git에는 같은 ID를 가진 구조화된 평가 결과를 남겨 모델 없이도 실험 조건과 결론을 검토할 수 있게 한다.
+
+## 12. 실험 운영 전략
+
+모든 환경·reward·physics 튜닝은 다음 순서를 따른다.
+
+```text
+관찰 → 근거 수집 → 가설 → 사전 채택 기준 → 단일 변경
+→ D20 평가 → 필요 시 V100 평가 → 채택/기각 → 다음 질문
+```
+
+### 순서와 일자 기록
+
+의미 기반 experiment ID는 유지하되, 각 실험 문서 안에 별도의 시간 메타데이터를 기록한다.
+
+```text
+sequence: EXP-001
+created: YYYY-MM-DD
+planned: YYYY-MM-DD | N/A
+started: YYYY-MM-DD | —
+completed: YYYY-MM-DD | —
+predecessor: <experiment-id> | none
+```
+
+- `sequence`는 실험 문서를 만든 시간 순서이며 `EXP-001`부터 증가한다.
+- 순번은 chronology용 metadata일 뿐 파일명이나 experiment ID에 넣지 않는다.
+- `created`는 문서 생성일이다.
+- `planned`는 가설과 채택 기준을 결과 확인 전에 고정한 날짜다.
+- `started`는 코드 변경 또는 학습 실행을 시작한 날짜다.
+- `completed`는 평가와 결론 기록까지 끝난 날짜다.
+- 소급 작성한 과거 실험은 `planned: N/A (retrospective)`로 표시하고 사전 등록된 것처럼 꾸미지 않는다.
+- 날짜는 프로젝트 timezone 기준 ISO 8601 `YYYY-MM-DD` 형식을 사용한다.
+- `predecessor`는 이번 질문을 직접 만든 직전 실험을 가리킨다. 단순히 직전 번호를 기계적으로 연결하지 않는다.
+
+### 실험 시작 전
+
+- 먼저 baseline의 수치와 trajectory를 확인한다.
+- 변경 전에 가설과 채택 기준을 문장으로 적는다.
+- 독립변수 하나와 반드시 유지할 통제변수를 명시한다.
+- 결과 파일 이름과 experiment ID를 먼저 정한다.
+- T100 결과를 보거나 사용하지 않는다.
+
+### 실험 실행 중
+
+- 학습 실패, 예상 밖 결과, 기각된 후보도 삭제하지 않는다.
+- 코드와 실행 설정이 달라졌다면 같은 experiment ID를 재사용하지 않는다.
+- 여러 변경을 실수로 함께 적용했다면 탐색 결과로만 취급하고 정식 비교에서 제외한다.
+- 정량 결과와 함께 최소 한 개 이상의 대표 trajectory를 확인한다.
+
+### 실험 종료 후
+
+- 결과를 가설에 유리하게 해석하지 않고 사전 채택 기준으로 판정한다.
+- 채택/기각/판단 보류 중 하나를 명시한다.
+- 결과가 예상과 다르면 새로운 가설을 별도 실험으로 분리한다.
+- 다음 실험은 이번 결과가 만든 가장 중요한 질문 하나만 다룬다.
+- 최종 README에는 모든 시행착오가 아니라 설계 판단을 바꾼 대표 실험 2~3개만 요약한다.
+
+## 13. 증거의 우선순위
+
+판단 근거는 다음 순서로 신뢰한다.
+
+1. 자동 correctness test
+2. 고정 seed 정량 평가
+3. controller baseline과의 비교
+4. episode trajectory 및 Unity 재생
+5. TensorBoard 학습 곡선
+6. 주관적인 시각 인상
+
+학습 reward 상승만으로 정책 개선을 주장하지 않는다. 성공률이 높아도 trajectory가 의도한 행동과 다르면 원인을 분석한다. 반대로 시각적으로 그럴듯해도 고정 seed 결과가 개선되지 않으면 채택하지 않는다.
+
+## 14. 변경 유형별 경계
+
+| 변경 유형 | 예시 | 별도 실험 필요 여부 |
+|---|---|---|
+| correctness fix | action L2 cap, 잘못된 수식 수정 | 새 baseline을 만든 뒤 이후 실험의 전제로 사용 |
+| environment tuning | observation, reward, 종료 조건 | 반드시 단일 변수 실험 |
+| physics tuning | `F_MAX`, 마찰, timestep | 반드시 단일 변수 실험 및 물리 테스트 동반 |
+| task difficulty | terrain scale, erosion 강도 | physics와 분리해 실험 |
+| training tuning | PPO hyperparameter, training steps | 환경과 물리 고정 후 수행 |
+| instrumentation | 평가 필드·로그 추가 | 동작이 바뀌지 않으면 기존 baseline 유지 가능 |
+
+Correctness fix 전후 모델은 같은 baseline으로 섞지 않는다. 예를 들어 축별 action cap에서 학습한 `baseline-axis-cap-legacy`와 L2 cap에서 학습한 `baseline-l2cap`은 별도 결과로 취급한다.
+
+## 15. 실험 기록 위치
+
+```text
+benchmarks/
+├── evaluations/   # episode별 원시 JSON/CSV
+├── experiments/   # 가설, 변경, 결과, 결론을 담은 Markdown
+└── plots/         # 비교 그래프와 공개 문서용 이미지
+```
+
+각 실험 문서는 `benchmarks/EXPERIMENT_TEMPLATE.md`의 템플릿을 사용한다. 원시 결과와 실험 문서는 같은 experiment ID를 공유해야 한다.
+
+## 16. Plot 작성 원칙
+
+Plot은 결과를 장식하는 이미지가 아니라, 실험의 질문 하나에 답하는 증거다.
+
+### 필수 원칙
+
+- 하나의 plot은 하나의 질문만 다룬다.
+- 모든 plot은 생성에 사용한 JSON/CSV와 experiment ID를 명시한다.
+- 비교 대상은 같은 evaluation seed 집합과 같은 평가 조건을 사용한다.
+- 성공한 seed나 보기 좋은 trajectory만 골라 전체 성능처럼 제시하지 않는다.
+- 축 범위를 잘라 차이를 과장하지 않는다. 불가피하면 잘린 축임을 명확히 표시한다.
+- 여러 training seed 결과는 평균만 표시하지 않고 개별 값 또는 분산/error bar를 함께 표시한다.
+- smoothing을 적용했다면 window와 방식을 표시하고, 가능하면 원본 곡선도 희미하게 함께 표시한다.
+- 색만으로 범주를 구분하지 않고 label, marker 또는 line style을 함께 사용한다.
+- 제목에는 결론을 과장하지 않고 측정 대상을 적는다.
+- 단위, seed 수, 평가 집합(D20/V100/T100)을 그림 안이나 caption에 표시한다.
+
+### 권장 plot
+
+| Plot | 답해야 할 질문 |
+|---|---|
+| controller outcome 비교 | PPO가 Random/Direct controller보다 실제로 우수한가? |
+| baseline vs candidate outcome 비교 | 변경이 성공·이탈·timeout 비율을 어떻게 바꿨는가? |
+| success rate by training seed | 개선이 특정 학습 seed에만 의존하는가? |
+| 경사각 분포와 `θmax` | 지형에 실제 등반 불가 영역이 존재하는가? |
+| 대표 trajectory top-down plot | 정책이 직진·제동·방향 전환·우회를 어떻게 수행했는가? |
+| 거리·속도·action 시계열 | 목표 접근 중 제동이 실제로 발생했는가? |
+| throughput scaling | env 수 증가가 steps/sec와 효율에 어떤 영향을 줬는가? |
+
+### 대표 trajectory 선정 규칙
+
+trajectory는 정량 평가를 보완하는 사례이지 전체 결과의 대체물이 아니다.
+
+- seed와 선정 이유를 caption에 쓴다.
+- 성공·대표 실패·경계 사례를 구분한다.
+- 가능하면 median episode 또는 사전에 정한 seed를 사용한다.
+- 가장 보기 좋은 성공 사례만 골랐다면 `best case`라고 명시한다.
+- before/after 비교는 동일한 terrain/start/goal seed를 사용한다.
+
+### 파일과 재현성
+
+```text
+benchmarks/plots/<experiment-id>__eval-<set>__metric-<metric>.png
+benchmarks/plots/<experiment-id>__eval-<set>__metric-<metric>.svg
+```
+
+- README에는 호환성이 좋은 PNG를 사용한다.
+- 선·텍스트 기반 그래프는 가능하면 SVG도 함께 생성한다.
+- plot 생성 스크립트는 Git에 포함하고 수동 편집으로 수치를 바꾸지 않는다.
+- 그림만 보고도 평가 집합, episode 수, 단위와 비교 대상을 알 수 있어야 한다.
+- 최종 README에는 핵심 주장에 직접 필요한 plot만 3~5개 사용한다.
+
+## 17. 실험 및 아티팩트 명명 규칙
+
+`b0`, `e1`, `r1`, `p1`처럼 문서를 열어야 뜻을 알 수 있는 순번 전용 이름은 새 실험에 사용하지 않는다. 이름만 보고 변경 목적, 학습 seed, 평가 집합과 controller를 식별할 수 있어야 한다.
+
+### 공통 형식
+
+- 모두 소문자 ASCII를 사용한다.
+- 단어 내부는 kebab-case(`reward-oob-50`)를 사용한다.
+- 서로 다른 메타데이터 차원은 이중 underscore(`__`)로 구분한다.
+- 공백, 대문자, 날짜만으로 된 이름은 사용하지 않는다.
+- 파일 이름에 모든 hyperparameter를 넣지 않는다. 전체 설정은 결과 JSON과 실험 문서에 기록한다.
+
+### Experiment ID
+
+```text
+<category>-<changed-variable>-<value-or-purpose>
+```
+
+권장 category:
+
+| Category | 용도 | 예시 |
+|---|---|---|
+| `baseline` | 비교 기준 | `baseline-l2cap` |
+| `reward` | reward 변경 | `reward-oob-50` |
+| `obs` | observation 변경 | `obs-normalized` |
+| `physics` | 물리 파라미터·동작 변경 | `physics-fmax-4` |
+| `terrain` | 지형 난이도 변경 | `terrain-scale-6` |
+| `train` | PPO/학습 설정 변경 | `train-steps-2m` |
+| `perf` | 성능 실험 | `perf-parallel-envs` |
+
+Experiment ID에는 한 실험의 독립변수 하나만 표현한다. 같은 의미의 실험을 다시 실행하되 구현이나 조건이 달라졌다면 `-v2`를 붙이고, 단순 재실행은 training seed나 run 번호로 구분한다.
+
+### 평가 집합 토큰
+
+| 문서상 이름 | 파일 토큰 | Seed |
+|---|---|---:|
+| D20 | `eval-dev20` | `1000~1019` |
+| V100 | `eval-val100` | `2000~2099` |
+| T100 | `eval-test100` | `3000~3099` |
+
+`dev`, `val`, `test`의 의미가 파일 이름에 드러나게 하고 `d20`, `v100`, `t100`만 단독으로 쓰지 않는다.
+
+### 파일 및 디렉터리 형식
+
+PPO 모델과 raw log 디렉터리:
+
+```text
+training/artifacts/<experiment-id>__train-s<seed>/
+```
+
+평가 결과:
+
+```text
+benchmarks/evaluations/<experiment-id>__train-s<seed>__eval-<set>__controller-ppo.json
+benchmarks/evaluations/<experiment-id>__eval-<set>__controller-<direct|random>.json
+```
+
+실험 문서:
+
+```text
+benchmarks/experiments/<experiment-id>.md
+```
+
+Plot:
+
+```text
+benchmarks/plots/<experiment-id>__eval-<set>__metric-<metric>.png
+benchmarks/plots/<experiment-id>__eval-<set>__metric-<metric>.svg
+```
+
+예시:
+
+```text
+training/artifacts/reward-oob-50__train-s0/
+benchmarks/experiments/reward-oob-50.md
+benchmarks/evaluations/reward-oob-50__train-s0__eval-dev20__controller-ppo.json
+benchmarks/evaluations/reward-oob-50__train-s0__eval-val100__controller-ppo.json
+benchmarks/evaluations/baseline-l2cap__eval-val100__controller-direct.json
+benchmarks/plots/reward-oob-50__eval-val100__metric-outcomes.png
+```
+
+### 결과 내부 식별자
+
+평가 JSON에는 파일 이름과 별도로 다음 메타데이터를 저장한다.
+
+```text
+experiment_id
+training_seed
+training_steps
+evaluation_set
+evaluation_seed_start
+evaluation_seed_end
+controller
+commit_sha
+```
+
+파일 이름은 사람이 찾기 위한 색인이고 JSON metadata가 최종 진실의 원천이다. 파일 이름과 metadata가 다르면 결과를 정식 비교에서 제외한다.
+
+### 기존 파일 처리
+
+초기의 `b0/b1/b2` 이름은 의미 기반 이름으로 마이그레이션했다. 대체된 실행도 파일 이름에 `legacy`를 붙이지 않고 실제 조건으로 식별하며, `superseded` 여부는 metadata와 실험 문서에 기록한다.
