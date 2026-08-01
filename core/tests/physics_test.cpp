@@ -166,3 +166,19 @@ TEST(RigidBodyPhysics, StepIsDeterministicForIdenticalInputs) {
     }
 
 }
+
+// 경계 조건: 에이전트가 맵 밖으로 나가면 stepRigidBody()가 Heightmap::sample()을
+// grid 범위 밖 좌표로 호출한다. 이때 크래시 없이, 가장자리 값으로 clamp된
+// 높이가 나와야 한다 - x=width-1(정상 clamp되는 격자 인덱스라 버그와
+// 무관하게 항상 신뢰 가능한 기준값)과 x=1000(범위 밖) 샘플이 같아야 함.
+TEST(HeightmapSample, ClampsQueryFarOutsideGrid) {
+    Heightmap terrain = makeTestTerrain(42);
+    int width = terrain.width();
+    float x = float(width-1);
+    float z = 32.5f;
+    float edgeHeight = terrain.sample(x,z).height;
+    float farHeight = terrain.sample(1000.5f,z).height;
+
+    EXPECT_EQ(farHeight, edgeHeight)
+        << "sample() extrapolated instead of clamping for a query far outside the grid";
+}

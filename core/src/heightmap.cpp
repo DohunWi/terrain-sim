@@ -30,6 +30,9 @@ HeightSample Heightmap::sample(float x, float y) const {
     int y0 = static_cast<int>(std::floor(y));
     x0 = std::clamp(x0, 0, width_ - 2);
     y0 = std::clamp(y0, 0, height_ - 2);
+    x = std::clamp(x, 0.0f, float(width_ - 1));
+    y = std::clamp(y, 0.0f, float(height_ - 1));
+
     int x1 = x0 + 1;
     int y1 = y0 + 1;
 
