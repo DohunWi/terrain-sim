@@ -57,6 +57,7 @@ def main() -> None:
     parser.add_argument("--erosion-iterations", type=int, default=None)
     parser.add_argument("--f-max", type=float, default=None)
     parser.add_argument("--max-steps", type=int, default=None)
+    parser.add_argument("--out-of-bounds-penalty", type=float, default=None)
     args = parser.parse_args()
 
     args.log_dir.mkdir(parents=True, exist_ok=True)
@@ -65,7 +66,7 @@ def main() -> None:
         persistence=args.persistence, lacunarity=args.lacunarity,
         talus_angle=args.talus_angle, erosion_rate=args.erosion_rate,
         erosion_iterations=args.erosion_iterations, f_max=args.f_max,
-        max_steps=args.max_steps,
+        max_steps=args.max_steps, out_of_bounds_penalty=args.out_of_bounds_penalty,
     )
     env = Monitor(raw_env, filename=str(args.log_dir / "monitor"))
     model = PPO("MlpPolicy", env, seed=args.seed, verbose=1, tensorboard_log=str(args.tb_log_dir))

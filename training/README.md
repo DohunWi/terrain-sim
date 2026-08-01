@@ -13,7 +13,7 @@ Phase 2b/2c: `core/`(C++ 코어) 위에 얹는 Gymnasium 환경(`env.py`) + stab
 - **종료**: 목표 도달·맵 이탈 = `terminated`, `MAX_STEPS` 도달 = `truncated`
 - **도메인 랜덤화**: `reset(seed=...)`마다 fbm + 얕은 thermal erosion으로 지형 재생성, start/goal도 같은 시드로 재배치 (재현성 확인됨)
 
-`TerrainAgentEnv(...)` 생성자는 `map_size`/`scale`/`octaves`/`persistence`/`lacunarity`/`talus_angle`/`erosion_rate`/`erosion_iterations`/`f_max`를 전부 override 가능 (기본값은 클래스 상수) — `train.py`/`eval.py`/`analyze_terrain.py` 세 스크립트가 전부 같은 CLI 플래그로 이걸 노출한다.
+`TerrainAgentEnv(...)` 생성자는 `map_size`/`scale`/`octaves`/`persistence`/`lacunarity`/`talus_angle`/`erosion_rate`/`erosion_iterations`/`f_max`/`max_steps`/`out_of_bounds_penalty`를 override 가능하다(기본값은 클래스 상수). `train.py`와 `eval.py`는 같은 CLI 플래그로 이 값을 노출하며, `eval.py`는 model의 `meta.json` 값을 기본으로 사용한다.
 
 ## 환경 설정
 

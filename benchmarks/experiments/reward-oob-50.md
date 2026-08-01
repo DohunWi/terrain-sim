@@ -7,13 +7,13 @@
 | Sequence | `EXP-002` |
 | Created | `2026-08-01` |
 | Planned | `2026-08-01` |
-| Started | `—` |
-| Completed | `—` |
+| Started | `2026-08-01` |
+| Completed | `2026-08-01` |
 | Predecessor | `env-maxsteps1000-fmax2` |
 
 ## 상태
 
-`Planned`
+`Rejected`
 
 ## 관찰
 
@@ -95,28 +95,35 @@ D20 gate를 통과하면 `env-maxsteps1000-fmax2` baseline과 `reward-oob-50` ca
 
 ## 실행 정보
 
-- commit SHA: 실행 시 기록
-- 실행 명령: 구현 후 기록
-- candidate model 예정 위치: `training/artifacts/reward-oob-50/model.zip` (로컬, Git 제외)
-- D20 결과 예정 위치: `benchmarks/evaluations/reward-oob-50__train-s0__eval-dev20__controller-ppo.json`
-- V100 결과 예정 위치: `benchmarks/evaluations/reward-oob-50__train-s0__eval-val100__controller-ppo.json`
+- commit SHA: `9d3d8797e604a5971a0fbf251c9e1592c3c5350d` (working tree dirty)
+- 실행 명령: `/Users/widohun/miniconda3/bin/python3 train.py --timesteps 1000000 --seed 0 --out artifacts/reward-oob-50/model --log-dir artifacts/reward-oob-50/logs --tb-log-dir artifacts/reward-oob-50/tb_logs --run-name reward-oob-50 --experiment-id reward-oob-50 --out-of-bounds-penalty 50`
+- 모델 위치(로컬, Git 제외): `training/artifacts/reward-oob-50/model.zip`
+- D20 평가 명령: `/Users/widohun/miniconda3/bin/python3 eval.py --model artifacts/reward-oob-50/model --controller ppo --episodes 20 --seed-start 1000 --experiment-id reward-oob-50 --out ../benchmarks/evaluations/reward-oob-50__train-s0__eval-dev20__controller-ppo.json --dump-trajectory ../unity-client/Assets/StreamingAssets/reward-oob-50__eval-dev20__replay.json`
+- D20 결과: [`reward-oob-50__train-s0__eval-dev20__controller-ppo.json`](../evaluations/reward-oob-50__train-s0__eval-dev20__controller-ppo.json)
+- V100: 실행하지 않음 (D20 development gate 실패)
 
 ## 결과
 
-아직 구현·학습·평가하지 않았다.
-
 | 지표 | Baseline | Candidate | 변화 |
 |---|---:|---:|---:|
-| Success rate | D20 20% | — | — |
-| Out-of-bounds rate | D20 75% | — | — |
-| Timeout rate | D20 5% | — | — |
-| Median success steps | D20 341 | — | — |
-| Mean return | D20 17.68 | — | — |
+| Success rate | 20% (4/20) | 15% (3/20) | -5%p |
+| Out-of-bounds rate | 75% (15/20) | 60% (12/20) | -15%p |
+| Timeout rate | 5% (1/20) | 25% (5/20) | +20%p |
+| Median success steps | 341 | 329 | -12 |
+| Mean return | 17.68 | -7.05 | -24.73 |
+
+후보는 양의 return으로 끝난 맵 이탈을 `10/15`에서 `0/12`로 제거했다. 그러나 이탈 감소가 성공으로 이어지지 않았고, timeout이 4개 증가했다. D20 replay에서도 제동과 재조향이 일관되게 나타나지 않았으며, 이탈을 피한 episode 일부는 목표에서 먼 상태로 timeout됐다.
+
+`rollout/ep_rew_mean`은 학습 초반 약 `-9.90`에서 최종 `-5.13`까지 개선됐지만, 마지막 10개 기록 평균도 `-1.95`였다. 이 값은 stochastic training rollout의 이동 평균이므로 채택 판단에는 고정 seed deterministic D20 결과를 우선했다.
 
 ## 결론
 
-`Planned` — 결과 없음.
+`Rejected`
+
+D20 development gate의 세 조건 중 timeout 조건만 통과했다. 맵 이탈은 기준선보다 `15%p`만 감소해 요구한 `25%p`에 미달했고(`60% > 50%`), 성공률도 `15%`로 요구치 `30%`에 미달하면서 기준선보다 `5%p` 하락했다. penalty 증가는 양의 return 맵 이탈을 제거했지만, 행동을 성공으로 바꾸지 못하고 일부 실패를 timeout으로 이동시켰다. 따라서 사전등록된 규칙에 따라 V100을 실행하지 않는다.
 
 ## 다음 질문
 
-`OUT_OF_BOUNDS_PENALTY=50`이 직진·이탈 정책을 억제하면서 실제 제동과 재조향을 유도하는가, 아니면 움직임을 줄여 timeout으로 실패 유형만 바꾸는가?
+`OUT_OF_BOUNDS_PENALTY=30` 같은 중간 penalty가 맵 이탈을 줄이면서 timeout 증가 없이 성공률을 개선할 수 있는지는 열린 질문으로 남지만, 이 실험에서 추적하지 않는다.
+
+**환경 동결 결정 (2026-08-01)**: 이 실험은 이탈률이 줄어든 만큼(-15%p) timeout이 늘어난(+20%p) 실패 유형 전이 사례로, `AGENTS.md` 실험 루프에서 "이탈이 timeout으로 바뀜 → 원인 기록 후 환경 동결" 케이스에 해당한다. reward를 더 튜닝해 정책 성능을 연구 수준으로 다듬는 대신, 여기서 관측·튜닝 대상 환경(`env-maxsteps1000-fmax2`의 물리/지형/reward 구성)을 동결하고 Phase 2c(C++ correctness test + throughput profiling + parallel stepping)로 중심을 옮긴다. RL 쪽 남은 몫은 이 결론을 `docs/`의 RL case study 결과로 정리하는 것뿐이다.

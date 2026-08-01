@@ -75,7 +75,7 @@ class TerrainAgentEnv(gym.Env):
     EDGE_MARGIN = 4.0
     STEP_PENALTY = 0.01
     GOAL_REWARD = 50.0
-    OUT_OF_BOUNDS_PENALTY = 10.0
+    OUT_OF_BOUNDS_PENALTY = 50.0
 
     def __init__(
         self,
@@ -89,6 +89,7 @@ class TerrainAgentEnv(gym.Env):
         erosion_iterations: int | None = None,
         f_max: float | None = None,
         max_steps: int | None = None,
+        out_of_bounds_penalty: float | None = None,
     ):
         super().__init__()
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(6,), dtype=np.float32)
@@ -129,6 +130,8 @@ class TerrainAgentEnv(gym.Env):
             self.F_MAX = f_max
         if max_steps is not None:
             self.MAX_STEPS = max_steps  # explicit override wins over the map_size scaling above
+        if out_of_bounds_penalty is not None:
+            self.OUT_OF_BOUNDS_PENALTY = out_of_bounds_penalty
 
         self._gravity = ts.Vec3(0.0, -9.8, 0.0)
         self._heightmap: ts.Heightmap | None = None

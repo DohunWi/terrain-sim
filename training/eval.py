@@ -192,6 +192,7 @@ def main() -> None:
     parser.add_argument("--erosion-iterations", type=int, default=None)
     parser.add_argument("--f-max", type=float, default=None)
     parser.add_argument("--max-steps", type=int, default=None)
+    parser.add_argument("--out-of-bounds-penalty", type=float, default=None)
     args = parser.parse_args()
 
     meta_path = args.model.parent / "meta.json"
@@ -217,6 +218,9 @@ def main() -> None:
         erosion_iterations=resolved(args.erosion_iterations, "EROSION_ITERATIONS"),
         f_max=resolved(args.f_max, "F_MAX"),
         max_steps=resolved(args.max_steps, "MAX_STEPS"),
+        out_of_bounds_penalty=resolved(
+            args.out_of_bounds_penalty, "OUT_OF_BOUNDS_PENALTY"
+        ),
     )
 
     records = []

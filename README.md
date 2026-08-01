@@ -20,7 +20,7 @@ C++ physics
   → Unity replay
 ```
 
-현재는 완성된 최소 에이전트 파이프라인을 기반으로 환경·reward·physics를 통제 실험으로 튜닝하는 중이다. 이후 RL 환경 처리량을 프로파일링하고 병렬 stepping을 검토한다.
+RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵 이탈에서 시간초과로 전이되는 것만 확인, 성공률 개선 없음)을 마지막으로 동결했다. RL은 C++ 코어의 실제 workload이자 case study로 유지하되, 지금부터는 다시 C++ 물리 correctness test, 성능 계측, 병렬 stepping, 아키텍처 근거 문서화로 무게중심을 옮긴다.
 
 ## 구현된 기능
 
@@ -104,7 +104,7 @@ C++ physics
 - 100개 지형의 최대 경사: `14.3°`
 - 등반 불가능한 셀과 차단된 직선 경로: `0%`
 
-따라서 이 baseline은 terrain-aware routing보다 관성이 있는 goal navigation을 학습한 결과에 가깝다. 이후 `F_MAX=2.0`, `TALUS_ANGLE=0.15` 후보에서 직선 경로의 56%가 차단되면서도 모든 start-goal 쌍에 우회로가 존재하는 조건을 찾았다. 현재는 이 조건에서 나타난 직진 가속, 제동 실패와 맵 이탈을 trajectory와 fixed-seed 결과로 분석하고 있다.
+따라서 이 baseline은 terrain-aware routing보다 관성이 있는 goal navigation을 학습한 결과에 가깝다. 이후 `F_MAX=2.0`, `TALUS_ANGLE=0.15` 후보에서 직선 경로의 56%가 차단되면서도 모든 start-goal 쌍에 우회로가 존재하는 조건을 찾았다. 이 조건에서 나타난 맵 이탈(75%)을 줄이기 위해 out-of-bounds penalty를 5배로 올려 재학습했지만(`reward-oob-50`), 이탈이 준 만큼(-15%p) 시간초과가 늘었을 뿐(+20%p) 성공률은 개선되지 않아 기각했다. 이 결과를 마지막으로 reward/observation 튜닝을 동결하고, 지금은 C++ 물리 correctness test와 성능 계측·병렬화로 무게중심을 옮기는 중이다.
 
 성공률이나 training reward만으로 개선을 주장하지 않는다. 실험은 다음 순서를 따른다.
 
@@ -178,7 +178,7 @@ python3 train.py --timesteps 1000000 --seed 0 \
 | 1 | hydraulic erosion + TCP + Unity live visualization | 완료 |
 | 2a | 최소 강체 물리 + 지형 충돌 + 에너지 검증 | 완료 |
 | 2b | pybind11 + Gymnasium + PPO + fixed-seed evaluation | 완료 |
-| 2c | 환경/물리 검증, throughput profiling, parallel stepping | 진행 중 |
+| 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 진행 중 |
 | 2d | Unity policy replay와 지원용 결과 정리 | replay 완료, 최종 결과 대기 |
 | 2e | articulated robot extension | 2c 이후 검토 |
 | 3 | automated tests, CI, English documentation, final demo | 예정 |
