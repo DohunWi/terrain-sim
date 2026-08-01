@@ -63,5 +63,7 @@ unity-client/Assets/StreamingAssets/*.json.meta
 CLAUDE.md
 .claude/
 
+# codex
+AGENTS.md
 # --- Internal-only docs (planning notes, worklog — not for public repo) ---
 docs/private/
