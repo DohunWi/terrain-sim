@@ -50,9 +50,8 @@ add_executable(physics_test
 
 target_include_directories(physics_test PRIVATE src)
 
-# GoogleTest 연동은 Phase 3에서 추가 예정 (core/tests/)
-# enable_testing()
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(tests)
 
 # --- Phase 2b: pybind11 바인딩 (training/ RL 루프용, 선택적 타겟) ---
 # pyenv shim이 PATH에서 conda보다 우선하는 이 머신 환경에서는 plain
