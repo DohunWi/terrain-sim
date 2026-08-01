@@ -1,0 +1,42 @@
+{
+  "n_terrains": 50,
+  "seed_range": [
+    0,
+    49
+  ],
+  "env_constants": {
+    "MAP_SIZE": 64,
+    "SCALE": 2.0,
+    "OCTAVES": 3,
+    "PERSISTENCE": 0.5,
+    "LACUNARITY": 2.0,
+    "TALUS_ANGLE": 0.1,
+    "EROSION_RATE": 0.3,
+    "EROSION_ITERATIONS": 10,
+    "MASS": 1.0,
+    "DT": 0.016666666666666666,
+    "F_MAX": 5.0,
+    "MAX_STEPS": 500,
+    "GOAL_RADIUS": 1.0,
+    "MIN_START_GOAL_DIST": 20.0,
+    "EDGE_MARGIN": 4.0,
+    "STEP_PENALTY": 0.01,
+    "GOAL_REWARD": 50.0,
+    "OUT_OF_BOUNDS_PENALTY": 10.0
+  },
+  "gravity": 9.800000190734863,
+  "theta_max_deg": 27.03085980840947,
+  "commit_sha": "5d7b75717cb0687258b7f9b458a086e5574ed245",
+  "git_dirty": true,
+  "slope_angle_percentiles_deg": {
+    "p50": 5.973867416381836,
+    "p90": 7.6311726570129395,
+    "p95": 8.023172378540039,
+    "p99": 8.411626815795898,
+    "max": 11.05024528503418
+  },
+  "fraction_cells_over_theta_max": 0.0,
+  "fraction_straight_line_blocked": 0.0,
+  "fraction_blocked_with_detour": null,
+  "fraction_reachable_at_all": 1.0
+}
