@@ -13,6 +13,9 @@ struct Vec3{
     Vec3 operator*(float s) const {
         return Vec3{x*s, y*s, z*s};
     }
+    bool operator==(const Vec3& other) const {
+        return (x==other.x && y==other.y && z==other.z);
+    }
 };
 float length(Vec3 v);
 float dot(Vec3 v1, Vec3 v2);

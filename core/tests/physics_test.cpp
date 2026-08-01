@@ -130,3 +130,39 @@ TEST(RigidBodyPhysics, CannotClimbSlopeAboveCriticalAngle) {
       EXPECT_LE(body.position.x, startX)
           << "body climbed a slope above the critical angle";
 }
+
+// 결정성: stepRigidBody()는 랜덤성이 없는 순수 계산이라, 같은 초기 상태·
+// 같은 지형·같은 입력을 두 개의 독립된 RigidBody에 넣고 나란히 굴리면
+// 매 스텝 완전히 같은 결과가 나와야 한다(부동소수점이라도 근사치가 아니라
+// 정확히 일치 — 같은 코드를 같은 하드웨어에서 두 번 도는 것뿐이므로).
+// RL 학습의 고정 시드 재현성이 이 성질 위에 있다.
+TEST(RigidBodyPhysics, StepIsDeterministicForIdenticalInputs) {
+    int seed = 42;
+    Heightmap terrain = makeTestTerrain(seed);
+    Vec3 gravity{0.0f, -9.8f, 0.0f};
+    Vec3 noForce{0.0f, 0.0f, 0.0f};
+    float dt = 1.0f / 60.0f;
+
+    RigidBody body1;
+    body1.position = Vec3{20.0f, 5.0f, 20.0f};
+    body1.velocity = Vec3{0.0f, 0.0f, 0.0f};
+    body1.mass = 1.0f;
+
+    RigidBody body2;
+    body2.position = Vec3{20.0f, 5.0f, 20.0f};
+    body2.velocity = Vec3{0.0f, 0.0f, 0.0f};
+    body2.mass = 1.0f;
+
+
+    for (int i = 0; i < 300; ++i) {
+        stepRigidBody(body1, terrain, gravity, noForce, dt);
+        stepRigidBody(body2, terrain, gravity, noForce, dt);
+
+        EXPECT_EQ(body1.position, body2.position)
+            << "rigid bodies' positions diverged despite identical inputs";
+
+        EXPECT_EQ(body1.velocity, body2.velocity)
+            << "rigid bodies' velocities diverged despite identical inputs";
+    }
+
+}
