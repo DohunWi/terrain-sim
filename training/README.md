@@ -81,7 +81,7 @@ cd ../training
 - **지형 난이도 분석(`analyze_terrain.py`) 결과, `b0` 당시 파라미터(`F_MAX=5.0`, `theta_max=27.0°`)로는 가파른 셀이 0%** — 100개 지형 최대 경사가 14.3°. `F_MAX`가 물리적으로 발동한 적이 없어 사실상 평면 navigation이었음이 드러남. `SCALE`은 경사 분포에 거의 영향 없고(원본 노이즈 자체 최대 경사가 24.8°로 `theta_max` 아래), `F_MAX`를 낮추는 쪽으로 재보정 — **`F_MAX=2.0`(theta_max≈11.5°)/`TALUS_ANGLE=0.15`로 확정** (직선 경로 56% 차단, 100% 우회 가능). 지금 `env.py`의 클래스 기본값이 이 값.
 - `b1`(`F_MAX=2.0`/`TALUS_ANGLE=0.15`, `MAX_STEPS=500` 그대로): D20 30% 성공, 55% 시간초과로 급증 — 힘이 약해지며 순수 이동 자체가 느려졌는데 시간 예산은 그대로였던 게 원인.
 - `b2`(`MAX_STEPS=1000`으로 조정): 시간초과는 5%로 해소됐지만 **맵 이탈이 75%로 폭증**, 성공률 20%로 오히려 하락 — `b0`에서도 이미 있던 맵 이탈(observation에 경계 정보 부재로 추정)이 지금은 지배적 실패 유형. `MAX_STEPS=1000`도 확정된 기본값.
-- 세부 수치는 `benchmarks/evaluations/*.json`, 전체 튜닝 서사는 `docs/private/worklog.md` 2026-08-01 참고.
+- 세부 수치는 `benchmarks/evaluations/*.json` 참고.
 
 ## 아직 없음
 

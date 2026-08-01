@@ -66,9 +66,9 @@ class TerrainAgentEnv(gym.Env):
     # episodes of time regardless of detour difficulty (55% timeout at
     # MAX_STEPS=500 vs 5% at 1000, same F_MAX/TALUS_ANGLE). Raising the step
     # budget traded that timeout failure mode for a dominant out-of-bounds
-    # one instead (20%->75%) -- not yet resolved, see docs/private/worklog.md
-    # 2026-08-01 and docs/evaluation-protocol.md's next step (E1: add
-    # boundary-distance observation).
+    # one instead (20%->75%) -- not yet resolved, see
+    # docs/evaluation-protocol.md's next step (E1: add boundary-distance
+    # observation).
     MAX_STEPS = 1000
     GOAL_RADIUS = 1.0
     MIN_START_GOAL_DIST = 20.0
