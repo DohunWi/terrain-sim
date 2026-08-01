@@ -25,6 +25,8 @@ namespace TerrainSim.Replay
         [SerializeField] private float loopPauseSeconds = 1.5f;
         [SerializeField] private GameObject agentMarker;
         [SerializeField] private GameObject goalMarker;
+        [SerializeField] private float agentMarkerScale = 2.0f;
+        [SerializeField] private float goalMarkerScale = 1.0f;
 
         private MultiEpisodeReplay _data;
         private EpisodeRecord _current;
@@ -46,9 +48,9 @@ namespace TerrainSim.Replay
             GetComponent<MeshFilter>().mesh = _mesh;
 
             if (agentMarker == null)
-                agentMarker = CreateMarker("AgentMarker", Color.red, 0.6f);
+                agentMarker = CreateMarker("AgentMarker", Color.red, agentMarkerScale);
             if (goalMarker == null)
-                goalMarker = CreateMarker("GoalMarker", Color.green, 1.0f);
+                goalMarker = CreateMarker("GoalMarker", Color.green, goalMarkerScale);
 
             if (_data.episodes != null && _data.episodes.Length > 0)
                 SelectEpisode(_data.episodes[0]);
