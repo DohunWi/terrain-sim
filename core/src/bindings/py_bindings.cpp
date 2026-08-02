@@ -24,7 +24,8 @@ namespace {
 Heightmap generateFbmHeightmap(int width, int height, unsigned seed, float scale,
                                 int octaves, float persistence, float lacunarity) {
     Heightmap hm(width, height);
-    PerlinNoise noise(seed);
+    PerlinNoise noise;
+    noise.reseed(seed);
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             hm.at(x, y) = noise.fbm(static_cast<float>(x) / scale,

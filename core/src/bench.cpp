@@ -73,7 +73,8 @@ std::vector<double> timeEach(int iterations, int warmup, Fn&& fn) {
 
 Heightmap generateFbmHeightmap(unsigned seed) {
     Heightmap hm(kMapSize, kMapSize);
-    PerlinNoise noise(seed);
+    PerlinNoise noise;
+    noise.reseed(seed);
     for (int y = 0; y < kMapSize; ++y) {
         for (int x = 0; x < kMapSize; ++x) {
             hm.at(x, y) = noise.fbm(static_cast<float>(x) / kScale, static_cast<float>(y) / kScale,

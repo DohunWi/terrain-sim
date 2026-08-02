@@ -79,7 +79,8 @@ int main(int argc, char** argv) {
     std::string outBefore = getStr(args, "outBefore", "before.pgm");
     std::string outAfter = getStr(args, "outAfter", "after.pgm");
 
-    PerlinNoise noise(terrainSeed);
+    PerlinNoise noise;
+    noise.reseed(terrainSeed);
     Heightmap h(width, height);
     for (int y = 0; y < h.height(); ++y) {
         for (int x = 0; x < h.width(); ++x) {

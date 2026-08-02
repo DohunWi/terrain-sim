@@ -12,7 +12,8 @@ namespace {
 Heightmap makeTestTerrain(int seed) {
     const int width = 64;
     const int height = 64;
-    PerlinNoise noise(seed);
+    PerlinNoise noise;
+    noise.reseed(seed);
     Heightmap terrain(width, height);
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {

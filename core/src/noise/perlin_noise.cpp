@@ -4,14 +4,16 @@
 #include <random>
 #include "perlin_noise.h"
 
-PerlinNoise::PerlinNoise(unsigned seed)
+PerlinNoise::PerlinNoise()
     : gx_(std::make_unique<float[]>(TABLE_SIZE * TABLE_SIZE)),
       gy_(std::make_unique<float[]>(TABLE_SIZE * TABLE_SIZE))
 {
+}
+
+void PerlinNoise::reseed(unsigned seed){
     std::mt19937 rng(seed);
     double pi = std::numbers::pi;            // double 버전 (기본)
     std::uniform_real_distribution<float> dist(0.0f, 2*pi);
-
     for(int j=0; j<TABLE_SIZE; j++){
         for(int i=0; i<TABLE_SIZE; i++){
             gx_[j*TABLE_SIZE + i] = cos(dist(rng));

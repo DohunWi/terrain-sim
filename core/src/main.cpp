@@ -50,7 +50,8 @@ bool runSimulation(const Socket& conn, const std::unordered_map<std::string, std
     float lacunarity = getFloat(params, "lacunarity", 2.0f);
     int snapshotCount = std::max(1, getInt(params, "snapshotCount", 12));
 
-    PerlinNoise noise(terrainSeed);
+    PerlinNoise noise;
+    noise.reseed(terrainSeed);
     Heightmap h(width, height);
     for (int y = 0; y < h.height(); ++y) {
         for (int x = 0; x < h.width(); ++x) {

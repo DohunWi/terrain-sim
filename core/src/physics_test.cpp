@@ -12,7 +12,8 @@ int main() {
     const int width = 64;
     const int height = 64;
 
-    PerlinNoise noise(42);
+    PerlinNoise noise;
+    noise.reseed(42);
     Heightmap terrain(width, height);
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
