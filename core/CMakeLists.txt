@@ -76,6 +76,18 @@ add_executable(bench_batch
 target_include_directories(bench_batch PRIVATE src)
 target_link_libraries(bench_batch PRIVATE Threads::Threads)
 
+add_executable(bench_batch_perlin_reuse
+    src/bench_batch_perlin_reuse.cpp
+    src/heightmap.cpp
+    src/noise/perlin_noise.cpp
+    src/erosion/thermal_erosion.cpp
+    src/physics/rigid_body.cpp
+    src/physics/vec3.cpp
+)
+
+target_include_directories(bench_batch_perlin_reuse PRIVATE src)
+target_link_libraries(bench_batch_perlin_reuse PRIVATE Threads::Threads)
+
 enable_testing()
 add_subdirectory(tests)
 
