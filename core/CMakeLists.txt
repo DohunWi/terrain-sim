@@ -124,6 +124,19 @@ add_executable(bench_batch_thermal_bandwidth
 target_include_directories(bench_batch_thermal_bandwidth PRIVATE src)
 target_link_libraries(bench_batch_thermal_bandwidth PRIVATE Threads::Threads)
 
+add_executable(bench_batch_thermal_erode_alloc
+    src/bench_batch_thermal_erode_alloc.cpp
+    src/heightmap.cpp
+    src/noise/perlin_noise.cpp
+    src/erosion/thermal_erosion.cpp
+    src/physics/rigid_body.cpp
+    src/physics/vec3.cpp
+    tests/erosion_reference.cpp
+)
+
+target_include_directories(bench_batch_thermal_erode_alloc PRIVATE src)
+target_link_libraries(bench_batch_thermal_erode_alloc PRIVATE Threads::Threads)
+
 enable_testing()
 add_subdirectory(tests)
 
