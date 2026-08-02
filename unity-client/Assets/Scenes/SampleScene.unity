@@ -667,7 +667,7 @@ GameObject:
   - component: {fileID: 2109621615}
   - component: {fileID: 2109621614}
   m_Layer: 0
-  m_Name: ' Trajectory Replay'
+  m_Name: Trajectory Replay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -685,7 +685,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb093a60ee929400da226223f6837b2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerrainSim.Replay.TrajectoryReplay
-  fileName: reward-oob-50__eval-dev20__replay.json
+  fileName: b2_d20_replay.json
   cellSize: 1
   heightScale: 10
   stepsPerSecond: 60
