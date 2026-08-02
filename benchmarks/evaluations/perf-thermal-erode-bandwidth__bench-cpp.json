@@ -1,0 +1,12 @@
+{
+  "correctness_check_pass": true,
+  "sweep": [
+    {"thread_count": 1, "resets_per_sec_baseline_mean": 168.827, "resets_per_sec_baseline_sd": 17.9429, "resets_per_sec_candidate_mean": 454.857, "resets_per_sec_candidate_sd": 55.1555, "speedup_baseline": 1, "speedup_candidate": 1, "t_ratio": 0},
+    {"thread_count": 2, "resets_per_sec_baseline_mean": 259.081, "resets_per_sec_baseline_sd": 50.0568, "resets_per_sec_candidate_mean": 836.901, "resets_per_sec_candidate_sd": 166.637, "speedup_baseline": 1.53459, "speedup_candidate": 1.83992, "t_ratio": 2.49924},
+    {"thread_count": 4, "resets_per_sec_baseline_mean": 473.001, "resets_per_sec_baseline_sd": 78.9627, "resets_per_sec_candidate_mean": 1362.49, "resets_per_sec_candidate_sd": 267.945, "speedup_baseline": 2.80169, "speedup_candidate": 2.99543, "t_ratio": 0.977111},
+    {"thread_count": 6, "resets_per_sec_baseline_mean": 519.831, "resets_per_sec_baseline_sd": 93.9876, "resets_per_sec_candidate_mean": 1633.84, "resets_per_sec_candidate_sd": 236.435, "speedup_baseline": 3.07907, "speedup_candidate": 3.59198, "t_ratio": 2.44951},
+    {"thread_count": 8, "resets_per_sec_baseline_mean": 519.408, "resets_per_sec_baseline_sd": 47.3712, "resets_per_sec_candidate_mean": 1981.12, "resets_per_sec_candidate_sd": 426.491, "speedup_baseline": 3.07656, "speedup_candidate": 4.35548, "t_ratio": 4.93402},
+    {"thread_count": 12, "resets_per_sec_baseline_mean": 636.222, "resets_per_sec_baseline_sd": 81.3888, "resets_per_sec_candidate_mean": 1893.71, "resets_per_sec_candidate_sd": 308.898, "speedup_baseline": 3.76848, "speedup_candidate": 4.1633, "t_ratio": 1.67678},
+    {"thread_count": 16, "resets_per_sec_baseline_mean": 609.518, "resets_per_sec_baseline_sd": 126.027, "resets_per_sec_candidate_mean": 2084.28, "resets_per_sec_candidate_sd": 235.657, "speedup_baseline": 3.6103, "speedup_candidate": 4.58227, "t_ratio": 3.8396}
+  ]
+}
