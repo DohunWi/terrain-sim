@@ -1,0 +1,14 @@
+{
+  "correctness_check_pass": true,
+  "sizeof_default": 64,
+  "sizeof_aligned": 64,
+  "sweep": [
+    {"thread_count": 1, "resets_per_sec_default_mean": 294.5, "resets_per_sec_default_sd": 9.58249, "resets_per_sec_aligned_mean": 292.544, "resets_per_sec_aligned_sd": 12.2106, "steps_per_sec_default_mean": 2.38483e+07, "steps_per_sec_default_sd": 993565, "steps_per_sec_aligned_mean": 2.29192e+07, "steps_per_sec_aligned_sd": 2.23762e+06},
+    {"thread_count": 2, "resets_per_sec_default_mean": 583.64, "resets_per_sec_default_sd": 18.7411, "resets_per_sec_aligned_mean": 591.241, "resets_per_sec_aligned_sd": 16.0205, "steps_per_sec_default_mean": 4.6525e+07, "steps_per_sec_default_sd": 2.32389e+06, "steps_per_sec_aligned_mean": 4.77669e+07, "steps_per_sec_aligned_sd": 1.27051e+06},
+    {"thread_count": 4, "resets_per_sec_default_mean": 915.038, "resets_per_sec_default_sd": 120.77, "resets_per_sec_aligned_mean": 965.874, "resets_per_sec_aligned_sd": 125.513, "steps_per_sec_default_mean": 6.93823e+07, "steps_per_sec_default_sd": 1.48816e+07, "steps_per_sec_aligned_mean": 6.50951e+07, "steps_per_sec_aligned_sd": 1.23109e+07},
+    {"thread_count": 6, "resets_per_sec_default_mean": 1114.29, "resets_per_sec_default_sd": 173.359, "resets_per_sec_aligned_mean": 1078.31, "resets_per_sec_aligned_sd": 261.595, "steps_per_sec_default_mean": 6.85527e+07, "steps_per_sec_default_sd": 1.01663e+07, "steps_per_sec_aligned_mean": 7.12865e+07, "steps_per_sec_aligned_sd": 1.5875e+07},
+    {"thread_count": 8, "resets_per_sec_default_mean": 1335.02, "resets_per_sec_default_sd": 269.853, "resets_per_sec_aligned_mean": 1570.39, "resets_per_sec_aligned_sd": 204.864, "steps_per_sec_default_mean": 7.69511e+07, "steps_per_sec_default_sd": 8.92777e+06, "steps_per_sec_aligned_mean": 8.19873e+07, "steps_per_sec_aligned_sd": 9.1525e+06},
+    {"thread_count": 12, "resets_per_sec_default_mean": 1341.19, "resets_per_sec_default_sd": 142.236, "resets_per_sec_aligned_mean": 1414.42, "resets_per_sec_aligned_sd": 181.463, "steps_per_sec_default_mean": 9.60015e+07, "steps_per_sec_default_sd": 1.51119e+07, "steps_per_sec_aligned_mean": 1.09401e+08, "steps_per_sec_aligned_sd": 1.07299e+07},
+    {"thread_count": 16, "resets_per_sec_default_mean": 1419.71, "resets_per_sec_default_sd": 214.466, "resets_per_sec_aligned_mean": 1382.28, "resets_per_sec_aligned_sd": 168.911, "steps_per_sec_default_mean": 1.0191e+08, "steps_per_sec_default_sd": 1.44523e+07, "steps_per_sec_aligned_mean": 1.05657e+08, "steps_per_sec_aligned_sd": 1.74307e+07}
+  ]
+}

@@ -281,7 +281,9 @@ int main(int argc, char** argv) {
 
     // --- Throughput sweep, default vs cache-aligned layout. ---
     const std::vector<int> threadCounts = {1, 2, 4, 6, 8, 12, 16};
-    constexpr int kRepeats = 7;
+    // Bumped 7 -> 20 (EXP-007/008 lesson: n=7 wasn't enough to reliably
+    // separate real effects from noise for this workload).
+    constexpr int kRepeats = 20;
     constexpr int kEpisodesPerStepPhase = 50;
 
     auto defaultSweep = runSweep<EnvSlotDefault>(threadCounts, kRepeats, kEpisodesPerStepPhase);
