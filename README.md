@@ -24,6 +24,8 @@ RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵
 
 성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(`benchmarks/experiments/perf-*.md`)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.5배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
 
+C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-threshold, determinism, heightmap 경계, 침식 리팩토링 bit-exactness)를 갖췄고, `.github/workflows/ci.yml`이 push/PR마다 `core/` 전체 CMake 트리를 빌드하고 이 테스트를 GCC(ubuntu-latest)에서 실행한다 — 로컬(AppleClang)에서는 통과하던 코드가 CI 첫 실행에서 표준 라이브러리 구현체 차이로 인한 누락 include를 실제로 잡아냈다.
+
 ## 구현된 기능
 
 ### C++ simulation core
@@ -181,9 +183,9 @@ python3 train.py --timesteps 1000000 --seed 0 \
 | 2a | 최소 강체 물리 + 지형 충돌 + 에너지 검증 | 완료 |
 | 2b | pybind11 + Gymnasium + PPO + fixed-seed evaluation | 완료 |
 | 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 완료 |
-| 2d | Unity policy replay와 지원용 결과 정리 | replay 완료, 최종 결과 대기 |
+| 2d | Unity policy replay와 결과 정리 | replay 완료, 최종 결과 대기 |
 | 2e | articulated robot extension | 2c 이후 검토 |
-| 3 | automated tests, CI, English documentation, final demo | 예정 |
+| 3 | English documentation, final demo | 예정 |
 
 ## 문서
 
