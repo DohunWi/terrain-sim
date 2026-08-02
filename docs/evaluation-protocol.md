@@ -440,3 +440,31 @@ commit_sha
 ### 기존 파일 처리
 
 초기의 `b0/b1/b2` 이름은 의미 기반 이름으로 마이그레이션했다. 대체된 실행도 파일 이름에 `legacy`를 붙이지 않고 실제 조건으로 식별하며, `superseded` 여부는 metadata와 실험 문서에 기록한다.
+
+## 18. `perf` 실험의 통계적 판단 기준
+
+RL episode 평가(성공/맵 이탈/시간초과)는 §2의 D20/V100/T100 seed 집합과 이항분포 기반 불확실성(§13)으로 판단 기준을 갖는다. `perf` 카테고리 성능 실험(예: `perf-parallel-envs`, `perf-perlin-table-reuse`)은 episode가 아니라 처리량(steps/sec, resets/sec) 같은 연속값을 반복 측정하므로 별도 기준이 필요하다.
+
+**개선폭을 라운드 넘버(“+30% 이상”처럼)로 사전 등록하는 것만으로는 부족하다** — 반복 측정에 실제로 상당한 분산이 있는데(스레드 스케줄링, 캐시 상태 등), 그 분산을 반영하지 않은 임계값은 노이즈를 개선으로 착각하거나 진짜 개선을 노이즈로 착각할 수 있다.
+
+### 방법
+
+thread_count당 반복 횟수 `n`(perf 실험 기본값 7)에 대해, baseline/candidate 각각의 평균 `mean`과 표준편차 `sd`가 있다고 하자.
+
+```text
+SE_baseline  = sd_baseline / sqrt(n)
+SE_candidate = sd_candidate / sqrt(n)
+SE_diff      = sqrt(SE_baseline^2 + SE_candidate^2)
+t            = (mean_candidate - mean_baseline) / SE_diff
+pct_change   = (mean_candidate - mean_baseline) / mean_baseline * 100
+```
+
+`n=7` 수준의 표본에서 `|t| >= 2.5`는 대략 양측 `p<0.05`에 해당하는 실무적 문턱으로 쓴다(엄밀한 Welch–Satterthwaite 자유도 계산 대신 쓰는 근사치임을 명시한다).
+
+### 판정 (지표별로 따로 판정한다 — steps/sec와 resets/sec를 하나로 뭉쳐 판정하지 않는다)
+
+- **Accepted**: `|t| >= 2.5`(노이즈로 설명 안 됨) **그리고** 방향이 개선 **그리고** `|pct_change| >= 10%`(통계적으로 유의하지만 실무적으로 무의미한 차이를 걸러냄).
+- **Rejected**: `|t| < 1.0`(신호 없음, 노이즈와 구별 안 됨) — 점 추정치의 방향과 무관하게 "차이 없음"으로 본다. `|t| >= 2.5`인데 방향이 악화인 경우도 Rejected.
+- **Inconclusive**: 그 사이(`1.0 <= |t| < 2.5`), 또는 통계적으로 유의하지만 `pct_change`가 10% 미만인 경우.
+
+지표별 판정이 갈리면(예: resets/sec는 Accepted, steps/sec는 Rejected) 실험 전체를 하나의 라벨로 억지로 합치지 않고 지표별로 결론을 따로 기술한다.
