@@ -468,3 +468,21 @@ pct_change   = (mean_candidate - mean_baseline) / mean_baseline * 100
 - **Inconclusive**: 그 사이(`1.0 <= |t| < 2.5`), 또는 통계적으로 유의하지만 `pct_change`가 10% 미만인 경우.
 
 지표별 판정이 갈리면(예: resets/sec는 Accepted, steps/sec는 Rejected) 실험 전체를 하나의 라벨로 억지로 합치지 않고 지표별로 결론을 따로 기술한다.
+
+### 비율(speedup) 비교 — delta method
+
+두 워크로드의 절대 처리량이 아니라 **확장 배수**(`speedup(N) = mean(N) / mean(1)`) 자체를 비교해야 하는 실험(예: `perf-thermal-erode-bandwidth`)에서는 위 공식을 그대로 못 쓴다 — `speedup`은 이미 두 평균의 비율이라, 그 비율들끼리 다시 비교하면 "비율의 비율"이 되고 표준오차가 단순 합으로 안 나온다.
+
+`speedup = mean_N / mean_1`의 표준오차는 delta method로 1차 근사한다.
+
+```text
+SE_speedup ≈ speedup * sqrt( (SE_meanN / mean_N)^2 + (SE_mean1 / mean_1)^2 )
+```
+
+baseline과 candidate의 `speedup(N)`을 비교할 때(두 스윕은 서로 다른 프로그램 실행이라 독립):
+
+```text
+t = (speedup_candidate - speedup_baseline) / sqrt(SE_speedup_candidate^2 + SE_speedup_baseline^2)
+```
+
+판정 기준(`|t|>=2.5` 유의, `|t|<1.0` 무신호, 그 사이 Inconclusive)은 위와 동일하게 적용한다. 이 근사는 `mean_1`의 상대 표준오차가 크지 않을 때(반복 횟수가 충분할 때) 신뢰할 만하다 — 반복 횟수가 적어 `mean_1` 자체의 불확실성이 크면(예: `perf-thermal-erode-bandwidth`의 최초 `n=7` 실행) 이 근사를 쓰기 전에 반복 횟수를 늘리는 것을 권장한다.
