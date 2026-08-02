@@ -50,6 +50,18 @@ add_executable(physics_test
 
 target_include_directories(physics_test PRIVATE src)
 
+add_executable(bench
+    src/bench.cpp
+    src/heightmap.cpp
+    src/noise/perlin_noise.cpp
+    src/erosion/thermal_erosion.cpp
+    src/erosion/droplet_erosion.cpp
+    src/physics/rigid_body.cpp
+    src/physics/vec3.cpp
+)
+
+target_include_directories(bench PRIVATE src)
+
 enable_testing()
 add_subdirectory(tests)
 

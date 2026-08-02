@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {"name": "heightmap_generate_fbm", "n": 200, "mean_us": 2011.76, "median_us": 1966.62, "min_us": 1892.29, "max_us": 3020.21},
+    {"name": "thermal_erode_only_approx", "n": 200, "mean_us": 3521.71, "median_us": 3251.2, "min_us": 3076.83, "max_us": 26761.7},
+    {"name": "fbm_plus_thermal_erode_combined", "n": 200, "mean_us": 5533.47, "median_us": 5262.96, "min_us": 5088.58, "max_us": 28773.4},
+    {"name": "droplet_erode_only_approx_700", "n": 200, "mean_us": 970.102, "median_us": 959.244, "min_us": 845.078, "max_us": 1309.37},
+    {"name": "rigid_body_step", "n": 100000, "mean_us": 0.0192242, "median_us": 0, "min_us": 0, "max_us": 0.208},
+    {"name": "heightmap_sample", "n": 200000, "mean_us": 0.0150074, "median_us": 0, "min_us": 0, "max_us": 12.792}
+  ]
+}
