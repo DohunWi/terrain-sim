@@ -20,7 +20,9 @@ C++ physics
   → Unity replay
 ```
 
-RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵 이탈에서 시간초과로 전이되는 것만 확인, 성공률 개선 없음)을 마지막으로 동결했다. RL은 C++ 코어의 실제 workload이자 case study로 유지하되, 지금부터는 다시 C++ 물리 correctness test, 성능 계측, 병렬 stepping, 아키텍처 근거 문서화로 무게중심을 옮긴다.
+RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵 이탈에서 시간초과로 전이되는 것만 확인, 성공률 개선 없음)을 마지막으로 동결했다. RL은 C++ 코어의 실제 workload이자 case study로 유지하고, 이후 무게중심은 C++ 물리 correctness test, 성능 계측, 병렬 stepping, 아키텍처 근거 문서화로 옮겼다 — 이 작업은 완료됐다.
+
+성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(`benchmarks/experiments/perf-*.md`)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.5배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
 
 ## 구현된 기능
 
@@ -178,14 +180,15 @@ python3 train.py --timesteps 1000000 --seed 0 \
 | 1 | hydraulic erosion + TCP + Unity live visualization | 완료 |
 | 2a | 최소 강체 물리 + 지형 충돌 + 에너지 검증 | 완료 |
 | 2b | pybind11 + Gymnasium + PPO + fixed-seed evaluation | 완료 |
-| 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 진행 중 |
+| 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 완료 |
 | 2d | Unity policy replay와 지원용 결과 정리 | replay 완료, 최종 결과 대기 |
 | 2e | articulated robot extension | 2c 이후 검토 |
 | 3 | automated tests, CI, English documentation, final demo | 예정 |
 
 ## 문서
 
-- [`docs/evaluation-protocol.md`](docs/evaluation-protocol.md): 평가·실험·명명·plot 원칙
+- [`docs/evaluation-protocol.md`](docs/evaluation-protocol.md): 평가·실험·명명·plot 원칙, perf 실험 통계적 판단 기준
+- [`docs/performance-engineering.md`](docs/performance-engineering.md): Phase 2c 성능 실험 전체 요약과 before/after 근거
 - [`docs/rl-bindings.md`](docs/rl-bindings.md): C++/Python 바인딩 설계
 - [`docs/net-protocol.md`](docs/net-protocol.md): C++/Unity TCP 프로토콜
 - [`benchmarks/README.md`](benchmarks/README.md): benchmark 아티팩트 구조
