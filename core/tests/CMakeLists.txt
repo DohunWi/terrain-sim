@@ -9,10 +9,13 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(physics_tests
     physics_test.cpp
+    erosion_test.cpp
+    erosion_reference.cpp
     ../src/heightmap.cpp
     ../src/noise/perlin_noise.cpp
     ../src/physics/rigid_body.cpp
     ../src/physics/vec3.cpp
+    ../src/erosion/thermal_erosion.cpp
 )
 target_include_directories(physics_tests PRIVATE ../src)
 target_link_libraries(physics_tests PRIVATE GTest::gtest_main)

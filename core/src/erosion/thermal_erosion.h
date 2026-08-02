@@ -1,4 +1,6 @@
 #pragma once
+#include <array>
+
 #include "heightmap.h"
 
 struct LowestNeighbor {
@@ -7,6 +9,9 @@ struct LowestNeighbor {
     float value;
     float diff;
 };  
-
-std::vector<LowestNeighbor> findLowestNeighbor(const Heightmap& h, int x, int y);
+struct NeighborList {
+      std::array<LowestNeighbor, 4> items;
+      int count = 0;
+};
+NeighborList findLowestNeighbor(const Heightmap& h, int x, int y);
 void thermalErode(Heightmap& height, float talusAngle, float erosionRate, int iterations);

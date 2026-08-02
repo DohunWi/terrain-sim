@@ -1,0 +1,58 @@
+// See erosion_reference.h -- verbatim pre-refactor thermalErode/findLowestNeighbor,
+// renamed to avoid clashing with the real (refactored) versions linked into
+// the same test binary. Test-only.
+#include "erosion_reference.h"
+
+#include <vector>
+
+std::vector<LowestNeighborRef> findLowestNeighborRef(const Heightmap& h, int x, int y) {
+    std::vector<LowestNeighborRef> candidates;
+    LowestNeighborRef current{x, y, h.at(x, y), 0};
+
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+
+    for (int i = 0; i < 4; ++i) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+
+        if (0 <= nx && nx < h.width() && 0 <= ny && ny < h.height()) {
+            if (h.at(nx, ny) < current.value) {
+                candidates.push_back(LowestNeighborRef{nx, ny, h.at(nx, ny), h.at(x, y) - h.at(nx, ny)});
+            }
+        }
+    }
+    return candidates;
+}
+
+void thermalErodeRef(Heightmap& height, float talusAngle, float erosionRate, int iterations) {
+    for (int iter = 0; iter < iterations; ++iter) {
+        Heightmap next = height;
+
+        for (int y = 0; y < height.height(); ++y) {
+            for (int x = 0; x < height.width(); ++x) {
+                std::vector<LowestNeighborRef> candidates = findLowestNeighborRef(height, x, y);
+                float d_max = 0;
+                float d_total = 0;
+                for (const auto& c : candidates) {
+                    d_total += c.diff;
+                    if (c.diff >= d_max) {
+                        d_max = c.diff;
+                    }
+                }
+
+                if (d_max > talusAngle) {
+                    float moveAmount;
+                    moveAmount = (d_max - talusAngle) * erosionRate;
+                    next.at(x, y) -= moveAmount;
+
+                    for (const auto& c : candidates) {
+                        next.at(c.x, c.y) += moveAmount * c.diff / d_total;
+                    }
+                }
+            }
+        }
+
+        height = next;
+    }
+}
