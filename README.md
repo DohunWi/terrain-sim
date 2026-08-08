@@ -184,7 +184,7 @@ python3 train.py --timesteps 1000000 --seed 0 \
 | 2b | pybind11 + Gymnasium + PPO + fixed-seed evaluation | 완료 |
 | 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 완료 |
 | 2d-1 | Unity policy replay | 완료 |
-| 2d-2 | correctness/성능 심화 — CCD 지형 터널링 검증, 고정 Δt/sub-stepping 안정성, `thermalErode` SIMD 벡터화, 워커 풀 ThreadSanitizer, heightmap 보간-보존 회귀 테스트, 적분기(Euler/Verlet/RK4) 비교, 크로스플랫폼 부동소수점 결정론 조사 | 진행 예정 |
+| 2d-2 | correctness/성능 심화 — CCD 지형 터널링 검증, 고정 Δt/sub-stepping 안정성, `thermalErode` SIMD 벡터화, 워커 풀 ThreadSanitizer, heightmap 보간-보존 회귀 테스트, 적분기(Euler/Verlet/RK4) 비교, 크로스플랫폼 부동소수점 결정론 조사 | 완료 |
 | 2e | articulated robot extension | 2d 이후 검토 |
 | 3 | English documentation, final demo | 예정 |
 

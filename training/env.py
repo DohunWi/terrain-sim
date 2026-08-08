@@ -75,7 +75,7 @@ class TerrainAgentEnv(gym.Env):
     EDGE_MARGIN = 4.0
     STEP_PENALTY = 0.01
     GOAL_REWARD = 50.0
-    OUT_OF_BOUNDS_PENALTY = 50.0
+    OUT_OF_BOUNDS_PENALTY = 10.0
 
     def __init__(
         self,
