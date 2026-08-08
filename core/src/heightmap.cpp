@@ -17,14 +17,6 @@ Heightmap::Heightmap(int width, int height)
 {
 }
 
-float& Heightmap::at(int x, int y) {
-    return data_[static_cast<size_t>(y) * width_ + x];
-}
-
-float Heightmap::at(int x, int y) const {
-    return data_[static_cast<size_t>(y) * width_ + x];
-}
-
 HeightSample Heightmap::sample(float x, float y) const {
     int x0 = static_cast<int>(std::floor(x));
     int y0 = static_cast<int>(std::floor(y));

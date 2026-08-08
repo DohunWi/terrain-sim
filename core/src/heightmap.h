@@ -22,9 +22,13 @@ public:
     Heightmap(int width, int height);
 
     // 참조를 리턴하는 버전: h.at(x, y) = 1.5f; 처럼 값을 쓸 수 있음.
-    float& at(int x, int y);
+    // 헤더에 정의(inline)해서 다른 번역단위(thermal_erosion.cpp 등)에서
+    // 호출할 때도 컴파일러가 인라인할 수 있게 함 -- .cpp에 있으면 LTO 없이는
+    // 크로스-TU 인라인이 안 돼서, 이 사소한 accessor 하나가 벡터화를 막는
+    // 원인이 될 수 있음(2d-2 항목5에서 실측으로 확인).
+    float& at(int x, int y) { return data_[static_cast<size_t>(y) * width_ + x]; }
     // const 버전: 읽기 전용 Heightmap 객체에서도 호출 가능.
-    float at(int x, int y) const;
+    float at(int x, int y) const { return data_[static_cast<size_t>(y) * width_ + x]; }
 
     // 연속 좌표 (x, y)에서 bilinear 보간한 높이와 기울기를 구한다.
     // droplet erosion과 (앞으로의) physics 양쪽이 지형을 "쿼리"하는
