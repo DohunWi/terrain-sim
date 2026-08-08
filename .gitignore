@@ -1,5 +1,6 @@
 # --- C++ / CMake ---
 build/
+build-tsan/
 *.pgm
 cmake-build-*/
 CMakeCache.txt

@@ -11,6 +11,13 @@ endif()
 
 add_compile_options(-Wall -Wextra)
 
+# ThreadSanitizer for the bench_batch* worker-pool binaries (2d-2 item 6):
+# they're the only place in core/ with real cross-thread shared state
+# (std::barrier-synchronized WorkerPool over a shared EnvSlot array). Off by
+# default -- TSan instrumentation is 10x+ slower and not needed for normal
+# builds/CI; opt in with -DTSAN=ON.
+option(TSAN "Build bench_batch* targets with ThreadSanitizer" OFF)
+
 add_executable(terrain_sim_core
     src/main.cpp
     src/heightmap.cpp
@@ -137,6 +144,21 @@ add_executable(bench_batch_thermal_erode_alloc
 
 target_include_directories(bench_batch_thermal_erode_alloc PRIVATE src)
 target_link_libraries(bench_batch_thermal_erode_alloc PRIVATE Threads::Threads)
+
+if(TSAN)
+    set(TSAN_TARGETS
+        bench_batch
+        bench_batch_perlin_reuse
+        bench_batch_cache_align
+        bench_batch_perlin_reuse_aligned
+        bench_batch_thermal_bandwidth
+        bench_batch_thermal_erode_alloc
+    )
+    foreach(t ${TSAN_TARGETS})
+        target_compile_options(${t} PRIVATE -fsanitize=thread -g -O1)
+        target_link_options(${t} PRIVATE -fsanitize=thread)
+    endforeach()
+endif()
 
 enable_testing()
 add_subdirectory(tests)

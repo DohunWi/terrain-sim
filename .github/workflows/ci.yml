@@ -20,3 +20,23 @@ jobs:
       - name: Run tests
         working-directory: build
         run: ctest --output-on-failure
+
+  thread-sanitizer:
+    # bench_batch* are the only core/ binaries with real cross-thread shared
+    # state (std::barrier-synchronized WorkerPool over a shared EnvSlot
+    # array, from EXP-003 onward) -- this is the one place a data race is
+    # actually possible. Separate job: TSan instrumentation is slow and this
+    # doesn't need to build on every push path that other tests do.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (TSan)
+        run: cmake -S core -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DTSAN=ON
+
+      - name: Build bench_batch
+        run: cmake --build build-tsan --target bench_batch --parallel
+
+      - name: Run under ThreadSanitizer
+        working-directory: build-tsan
+        run: TSAN_OPTIONS="halt_on_error=1:exitcode=1" ./bench_batch
