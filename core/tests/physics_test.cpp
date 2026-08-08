@@ -38,6 +38,22 @@ Heightmap makeSlopeTerrain(float thetaRadians){
     return terrain;
 
 }
+
+// 폭 1그리드유닛짜리 벽(한 열만 솟은 지형). CCD(연속 충돌 감지) 부재
+// 테스트용 — stepRigidBody()가 스텝 시작 시점 위치 한 곳에서만 지형을
+// 샘플하고 시작점~끝점 사이 궤적은 검사하지 않는다는 구조적 성질을
+// 검증한다.
+Heightmap makeWallTerrain(int wallColumn, float wallHeight) {
+    const int width = 64;
+    const int height = 64;
+    Heightmap terrain(width, height);
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            terrain.at(x, y) = (x == wallColumn) ? wallHeight : 0.0f;
+        }
+    }
+    return terrain;
+}
 }  // namespace
 
 // 에너지 보존: erosion의 mass-conservation 체크에 해당하는 물리 버전.
@@ -172,6 +188,63 @@ TEST(RigidBodyPhysics, StepIsDeterministicForIdenticalInputs) {
 // grid 범위 밖 좌표로 호출한다. 이때 크래시 없이, 가장자리 값으로 clamp된
 // 높이가 나와야 한다 - x=width-1(정상 clamp되는 격자 인덱스라 버그와
 // 무관하게 항상 신뢰 가능한 기준값)과 x=1000(범위 밖) 샘플이 같아야 함.
+// 터널링: 한 스텝의 수평 이동 거리(velocity.x * dt = 6유닛)가 벽 폭(1
+// 그리드유닛)보다 훨씬 크면, 몸체가 벽의 존재를 한 번도 감지하지 못한 채
+// 반대편에 착지한다 — 속도(velocity.x)도 충돌 없이 전혀 안 바뀐 채로.
+// velocity를 힘 입력으로 "도달시키지" 않고 직접 세팅한 이유: 이 속도가
+// 현재 F_MAX/마찰(없음) 등 물리 파라미터로 실제 도달 가능한지는 여기서
+// 안 다룬다 — stepRigidBody() 자체가 이런 입력에 안전한지만 본다. 이렇게
+// 분리해두면 나중에 마찰 등이 추가돼 도달 가능 속도가 달라져도 이 테스트가
+// 검증하는 성질 자체는 그대로 유효하다.
+TEST(RigidBodyPhysics, TunnelsThroughNarrowWallAtHighVelocity) {
+    const int wallColumn = 35;
+    Heightmap terrain = makeWallTerrain(wallColumn, 10.0f);
+    Vec3 gravity{0.0f, -9.8f, 0.0f};
+    Vec3 noForce{0.0f, 0.0f, 0.0f};
+    float dt = 1.0f / 60.0f;
+
+    RigidBody body;
+    body.position = Vec3{30.0f, 1.0f, 32.0f};  // 벽에서 5칸 떨어진, 벽 높이(10)보다 훨씬 낮은 고도에서 공중
+    body.velocity = Vec3{360.0f, 0.0f, 0.0f};  // 한 스텝에 6유닛 이동 = 벽을 건너뜀
+    body.mass = 1.0f;
+
+    stepRigidBody(body, terrain, gravity, noForce, dt);
+
+    EXPECT_GT(body.position.x, float(wallColumn))
+        << "body did not end up past the wall it should have tunneled through";
+    EXPECT_NEAR(body.velocity.x, 360.0f, 1e-3f)
+        << "horizontal velocity changed, meaning a collision was actually detected -- "
+           "the wall may no longer be tall/thin enough to reproduce the gap";
+}
+
+// 대조군: 같은 벽이라도 연속된 힘으로 서서히 접근하면 정상적으로 막힌다 —
+// 벽 자체가 무력한 게 아니라, 고속에서만 나타나는 이산 샘플링의 구조적
+// 결함임을 보여준다. 벽 근처에서 gradX가 10(경사각 ~84°)까지 치솟아
+// CannotClimbSlopeAboveCriticalAngle과 같은 이유로 F_max=5.0로는 못 넘는다.
+TEST(RigidBodyPhysics, BlocksApproachToNarrowWallAtModerateVelocity) {
+    const int wallColumn = 35;
+    Heightmap terrain = makeWallTerrain(wallColumn, 10.0f);
+    Vec3 gravity{0.0f, -9.8f, 0.0f};
+    float dt = 1.0f / 60.0f;
+    const float F_max = 5.0f;
+
+    RigidBody body;
+    body.position.x = 25.0f;
+    body.position.z = 32.0f;
+    body.position.y = terrain.sample(body.position.x, body.position.z).height;
+    body.velocity = Vec3{0.0f, 0.0f, 0.0f};
+    body.mass = 1.0f;
+
+    Vec3 force{F_max, 0.0f, 0.0f};
+
+    for (int i = 0; i < 300; ++i) {
+        stepRigidBody(body, terrain, gravity, force, dt);
+    }
+
+    EXPECT_LT(body.position.x, float(wallColumn))
+        << "body tunneled through the wall even at a moderate, continuously-applied approach speed";
+}
+
 TEST(HeightmapSample, ClampsQueryFarOutsideGrid) {
     Heightmap terrain = makeTestTerrain(42);
     int width = terrain.width();
