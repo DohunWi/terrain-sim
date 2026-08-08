@@ -70,6 +70,13 @@ add_executable(bench
 
 target_include_directories(bench PRIVATE src)
 
+add_executable(bench_integrators
+    src/bench_integrators.cpp
+    src/physics/integrators.cpp
+)
+
+target_include_directories(bench_integrators PRIVATE src)
+
 find_package(Threads REQUIRED)
 
 add_executable(bench_batch

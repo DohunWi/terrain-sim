@@ -11,10 +11,12 @@ add_executable(physics_tests
     physics_test.cpp
     erosion_test.cpp
     erosion_reference.cpp
+    integrator_test.cpp
     ../src/heightmap.cpp
     ../src/noise/perlin_noise.cpp
     ../src/physics/rigid_body.cpp
     ../src/physics/vec3.cpp
+    ../src/physics/integrators.cpp
     ../src/erosion/thermal_erosion.cpp
     ../src/erosion/thermal_erosion_pull.cpp
 )
