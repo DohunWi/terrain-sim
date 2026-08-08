@@ -256,3 +256,31 @@ TEST(HeightmapSample, ClampsQueryFarOutsideGrid) {
     EXPECT_EQ(farHeight, edgeHeight)
         << "sample() extrapolated instead of clamping for a query far outside the grid";
 }
+
+// gradient 미clamp 버그: sample()은 x/y(연속 좌표)는 clamp해서 height를
+// 경계값으로 고정하지만, gradX/gradY는 clamp된 x0/x1 열의 raw 차분(h10-h00)을
+// 그대로 돌려준다 — 실제로는 clamp된 위치라 더 이동해도 height가 안 바뀌니
+// gradient도 0이어야 함. 이 불일치 때문에 몸체가 grid 밖(예: 맵 이탈)으로
+// 나가면 stepRigidBody()의 접촉 분기가 "여전히 경사를 타고 있다"고 믿고
+// 매 스텝 접선 방향 중력을 계속 속도에 더한다 — height는 안 바뀌는데
+// 속도만 무한정 커져서 에너지가 발산한다(2d-2 항목2 측정 중 실제로 재현:
+// 60° kink 지형에서 grid 밖으로 밀려난 몸체의 에너지가 스텝마다 계속
+// 증가). in-bounds 경계(x=0 정확히)의 gradient는 그대로 유효해야 하므로
+// 대조군으로 같이 확인한다.
+TEST(HeightmapSample, ZeroesGradientForQueryFarOutsideGrid) {
+    const float theta = 20.0f * M_PI / 180.0f;
+    Heightmap terrain = makeSlopeTerrain(theta);
+
+    HeightSample inBounds = terrain.sample(32.0f, 32.0f);
+    HeightSample farHigh = terrain.sample(1000.0f, 32.0f);
+    HeightSample farLow = terrain.sample(-1000.0f, 32.0f);
+
+    ASSERT_NE(inBounds.gradX, 0.0f)
+        << "sanity check: interior gradient should be nonzero on a sloped terrain";
+    EXPECT_EQ(farHigh.gradX, 0.0f)
+        << "gradient should be zero past the high edge -- otherwise contact response keeps "
+           "applying tangential gravity even though height no longer changes there, injecting "
+           "energy without bound";
+    EXPECT_EQ(farLow.gradX, 0.0f)
+        << "gradient should be zero past the low edge, for the same reason";
+}

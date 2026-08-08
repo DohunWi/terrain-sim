@@ -30,6 +30,9 @@ HeightSample Heightmap::sample(float x, float y) const {
     int y0 = static_cast<int>(std::floor(y));
     x0 = std::clamp(x0, 0, width_ - 2);
     y0 = std::clamp(y0, 0, height_ - 2);
+
+    bool xClamped = (x < 0.0f || x > float(width_ - 1));
+    bool yClamped = (y < 0.0f || y > float(height_ - 1));
     x = std::clamp(x, 0.0f, float(width_ - 1));
     y = std::clamp(y, 0.0f, float(height_ - 1));
 
@@ -53,6 +56,8 @@ HeightSample Heightmap::sample(float x, float y) const {
     hs.height = lerp(bottom, top, ty);
     hs.gradX = lerp(h10 - h00, h11 - h01, ty);
     hs.gradY = lerp(h01 - h00, h11 - h10, tx);
+    if(xClamped){hs.gradX = 0.0f;}
+    if(yClamped){hs.gradY = 0.0f;}
 
     return hs;
 }
