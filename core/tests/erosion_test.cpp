@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "../src/erosion/thermal_erosion.h"
+#include "../src/erosion/thermal_erosion_pull.h"
 #include "../src/heightmap.h"
 #include "../src/noise/perlin_noise.h"
 #include "erosion_reference.h"
@@ -44,6 +45,35 @@ TEST(ThermalErodeRefactor, MatchesPreRefactorReferenceCellByCell) {
         for (int y = 0; y < actual.height(); ++y) {
             for (int x = 0; x < actual.width(); ++x) {
                 ASSERT_EQ(actual.at(x, y), expected.at(x, y))
+                    << "seed=" << seed << " cell=(" << x << "," << y << ")";
+            }
+        }
+    }
+}
+
+// thermalErodePullModel() (2d-2 항목5, core/src/erosion/thermal_erosion_pull.cpp)은
+// thermalErode()와 수학적으로 같은 침식 물리를 계산하지만, scatter 대신
+// pull(gather) 모델이라 셀 하나의 최종값이 더해지는 순서가 다르다 -- 부동소수점
+// 덧셈은 결합법칙이 정확히 성립하지 않으므로 bit-exact는 기대하지 않고, 허용
+// 오차 내 일치만 확인한다. 벤치마크 전용 변형이라 frozen RL env의 운영 경로에는
+// 연결하지 않는다(core/src/bench.cpp에서만 참조).
+TEST(ThermalErodePullModel, MatchesScatterModelWithinTolerance) {
+    constexpr int kNumSeeds = 20;
+    constexpr float kTalusAngle = 0.15f;
+    constexpr float kErosionRate = 0.3f;
+    constexpr int kIterations = 10;
+    constexpr float kTolerance = 1e-3f;
+
+    for (unsigned seed = 0; seed < kNumSeeds; ++seed) {
+        Heightmap scatter = generateFbmHeightmap(seed);
+        Heightmap pull = scatter;  // 두 모델 다 같은 시작 지형에서 출발
+
+        thermalErode(scatter, kTalusAngle, kErosionRate, kIterations);
+        thermalErodePullModel(pull, kTalusAngle, kErosionRate, kIterations);
+
+        for (int y = 0; y < scatter.height(); ++y) {
+            for (int x = 0; x < scatter.width(); ++x) {
+                EXPECT_NEAR(pull.at(x, y), scatter.at(x, y), kTolerance)
                     << "seed=" << seed << " cell=(" << x << "," << y << ")";
             }
         }

@@ -55,6 +55,7 @@ add_executable(bench
     src/heightmap.cpp
     src/noise/perlin_noise.cpp
     src/erosion/thermal_erosion.cpp
+    src/erosion/thermal_erosion_pull.cpp
     src/erosion/droplet_erosion.cpp
     src/physics/rigid_body.cpp
     src/physics/vec3.cpp

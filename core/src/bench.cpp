@@ -15,6 +15,7 @@
 
 #include "erosion/droplet_erosion.h"
 #include "erosion/thermal_erosion.h"
+#include "erosion/thermal_erosion_pull.h"
 #include "heightmap.h"
 #include "noise/perlin_noise.h"
 #include "physics/rigid_body.h"
@@ -152,6 +153,29 @@ int main(int argc, char** argv) {
     printStat("fbm+thermal_erode(combined)", thermalCombinedStats, kIterations);
     results.push_back({"thermal_erode_only_approx", kIterations, thermalOnlyStats});
     results.push_back({"fbm_plus_thermal_erode_combined", kIterations, thermalCombinedStats});
+
+    // 2b. Thermal erosion, pull-model variant (2d-2 item 5) -- same params as
+    // above, same terrain-generation seeding, so this is a direct comparison
+    // against stage 2's scatter-model numbers. Not on TerrainAgentEnv's
+    // reset() path (core/tests/erosion_test.cpp's ThermalErodePullModel test
+    // covers correctness within tolerance; not bit-exact vs. thermalErode).
+    seed = 0;
+    auto thermalPullSamples = timeEach(kIterations, kWarmup, [&] {
+        Heightmap hm = generateFbmHeightmap(seed++);
+        thermalErodePullModel(hm, kTalusAngle, kErosionRate, kErosionIterations);
+        volatile float sink = hm.at(0, 0);
+        (void)sink;
+    });
+    auto thermalPullOnlySamples = std::vector<double>(thermalPullSamples.size());
+    for (size_t i = 0; i < thermalPullSamples.size(); ++i) {
+        thermalPullOnlySamples[i] = thermalPullSamples[i] - fbmStats.meanUs;
+    }
+    auto thermalPullOnlyStats = summarize(thermalPullOnlySamples);
+    auto thermalPullCombinedStats = summarize(thermalPullSamples);
+    printStat("thermal_erode_pull_only(approx)", thermalPullOnlyStats, kIterations);
+    printStat("fbm+thermal_erode_pull(combined)", thermalPullCombinedStats, kIterations);
+    results.push_back({"thermal_erode_pull_only_approx", kIterations, thermalPullOnlyStats});
+    results.push_back({"fbm_plus_thermal_erode_pull_combined", kIterations, thermalPullCombinedStats});
 
     // 3. Droplet erosion -- not on TerrainAgentEnv's reset() path today, but
     // part of the shared erosion/ stack (tune_cli.cpp, net protocol), so it's

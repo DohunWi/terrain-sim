@@ -16,6 +16,7 @@ add_executable(physics_tests
     ../src/physics/rigid_body.cpp
     ../src/physics/vec3.cpp
     ../src/erosion/thermal_erosion.cpp
+    ../src/erosion/thermal_erosion_pull.cpp
 )
 target_include_directories(physics_tests PRIVATE ../src)
 target_link_libraries(physics_tests PRIVATE GTest::gtest_main)
