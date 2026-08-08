@@ -284,3 +284,32 @@ TEST(HeightmapSample, ZeroesGradientForQueryFarOutsideGrid) {
     EXPECT_EQ(farLow.gradX, 0.0f)
         << "gradient should be zero past the low edge, for the same reason";
 }
+
+// 보간-보존 회귀: 2026-08-01, out-of-bounds clamp를 처음 고칠 때 1차
+// 시도(`x = float(std::clamp(int(x), 0, width_-1))`)가 int(x) 캐스팅으로
+// grid 안쪽의 모든 소수 좌표까지 정수로 잘라버려서 tx가 어디서나 0이
+// 되고 bilinear 보간이 계단 함수가 돼버리는 새 회귀를 만들었다. 당시
+// 있던 4개 테스트가 전부 정수 좌표만 쿼리해서 이걸 못 잡았고, 리뷰로만
+// 발견됨 — 이 테스트가 그 커버리지 갭을 메운다. 선형 경사 지형에서는
+// bilinear 보간이 정확히(오차 없이) 참값과 같아야 하므로, floor()로
+// 잘린 값(계단 함수 버그가 냈을 값)과 구분이 확실하다.
+TEST(HeightmapSample, InterpolatesFractionalCoordinatesOnLinearSlope) {
+    const float theta = 20.0f * M_PI / 180.0f;
+    Heightmap terrain = makeSlopeTerrain(theta);
+    const float slope = std::tan(theta);
+
+    const float x = 10.5f;
+    const float z = 32.3f;
+    HeightSample hs = terrain.sample(x, z);
+
+    EXPECT_NEAR(hs.tx, 0.5f, 1e-5f)
+        << "tx did not preserve the fractional part of x -- sample() may be truncating "
+           "to the floor() grid coordinate instead of interpolating";
+    EXPECT_NEAR(hs.ty, 0.3f, 1e-5f)
+        << "ty did not preserve the fractional part of y, same failure mode as tx";
+
+    float expectedHeight = slope * x;  // 선형 지형이라 보간값이 참값과 정확히 같아야 함
+    EXPECT_NEAR(hs.height, expectedHeight, 1e-4f)
+        << "interpolated height did not match the true value on a linear slope -- "
+           "consistent with collapsing to the nearest grid column instead of blending";
+}
