@@ -26,6 +26,8 @@ RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵
 
 C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-threshold, determinism, heightmap 경계, 침식 리팩토링 bit-exactness)를 갖췄고, `.github/workflows/ci.yml`이 push/PR마다 `core/` 전체 CMake 트리를 빌드하고 이 테스트를 GCC(ubuntu-latest)에서 실행한다 — 로컬(AppleClang)에서는 통과하던 코드가 CI 첫 실행에서 표준 라이브러리 구현체 차이로 인한 누락 include를 실제로 잡아냈다.
 
+이 기반 위에 다섯 가지 심화 검증을 추가했다. 고속 물체가 지형을 통과하는 CCD 터널링은 구조적으로는 재현되지만 현재 생성 지형의 경사 범위에서는 발동하지 않음을 회귀 테스트로 확인했고, 그 과정에서 heightmap 경계 밖 쿼리가 gradient 보간을 오염시키던 실제 버그를 찾아 수정했다. `Heightmap::at()`을 `.cpp`에서 header로 옮겨 cross-TU inline을 가능하게 한 결과 fBm + thermal erosion 결합 실행 시간이 평균 20.0% 줄었다 — SIMD 벡터화 자체는 이 워크로드에서 이득이 없다는 걸 확인하는 과정에서 찾아낸 별개의 병목이었다. 4종 적분기(Explicit/Semi-implicit Euler, Velocity Verlet, RK4) dt sweep으로 현재 semi-implicit Euler 선택의 수치적 근거를 확보했고, `bench_batch*` 워커 풀은 Linux/GCC ThreadSanitizer CI에서 race가 검출되지 않았다. 측정 환경, 원시 수치, 한계는 [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md)에 있다.
+
 ## 구현된 기능
 
 ### C++ simulation core
@@ -37,6 +39,11 @@ C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-thresho
 - semi-implicit Euler 기반 최소 강체 운동
 - 지형 법선을 이용한 충돌 응답과 접선 방향 중력·힘 투영
 - 에너지 거동 검증으로 접촉 중 중력이 누락되던 실제 버그 탐지 및 수정
+- heightmap 경계 밖 쿼리에서 height는 clamp되지만 gradient는 그대로 외삽되던 버그 탐지 및 수정
+- 고속 이동체의 CCD 지형 터널링 재현/대조 회귀 테스트 (현재 생성 지형 범위에서는 미발동)
+- `Heightmap::at()` cross-TU inline으로 thermal erosion 실행 시간 개선
+- Explicit/Semi-implicit Euler, Velocity Verlet, RK4 적분기 비교와 에너지 drift 벤치마크
+- `bench_batch*` 워커 풀에 대한 Linux/GCC ThreadSanitizer CI 검증
 - Unity용 TCP request-response 및 erosion snapshot 전송
 
 ### RL training environment
@@ -184,7 +191,7 @@ python3 train.py --timesteps 1000000 --seed 0 \
 | 2b | pybind11 + Gymnasium + PPO + fixed-seed evaluation | 완료 |
 | 2c | 환경 동결(2026-08-01) + 물리 correctness test, throughput profiling, parallel stepping, 아키텍처 근거 문서화 | 완료 |
 | 2d-1 | Unity policy replay | 완료 |
-| 2d-2 | correctness/성능 심화 — CCD 지형 터널링 검증, 고정 Δt/sub-stepping 안정성, `thermalErode` SIMD 벡터화, 워커 풀 ThreadSanitizer, heightmap 보간-보존 회귀 테스트, 적분기(Euler/Verlet/RK4) 비교, 크로스플랫폼 부동소수점 결정론 조사 | 완료 |
+| 2d-2 | correctness/성능 심화 — CCD 지형 터널링 검증, 고정 Δt/sub-stepping 안정성, heightmap gradient 경계 버그 수정, `Heightmap::at()` inline 성능 개선, 워커 풀 ThreadSanitizer, 적분기(Euler/Verlet/RK4) 비교. 근거: [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md) | 완료 |
 | 2e | articulated robot extension | 2d 이후 검토 |
 | 3 | English documentation, final demo | 예정 |
 
@@ -192,6 +199,7 @@ python3 train.py --timesteps 1000000 --seed 0 \
 
 - [`docs/evaluation-protocol.md`](docs/evaluation-protocol.md): 평가·실험·명명·plot 원칙, perf 실험 통계적 판단 기준
 - [`docs/performance-engineering.md`](docs/performance-engineering.md): Phase 2c 성능 실험 전체 요약과 before/after 근거
+- [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md): Phase 2d-2 correctness/성능 심화 근거 — 측정 환경, 실험 수치, 판단표
 - [`docs/rl-bindings.md`](docs/rl-bindings.md): C++/Python 바인딩 설계
 - [`docs/net-protocol.md`](docs/net-protocol.md): C++/Unity TCP 프로토콜
 - [`benchmarks/README.md`](benchmarks/README.md): benchmark 아티팩트 구조
