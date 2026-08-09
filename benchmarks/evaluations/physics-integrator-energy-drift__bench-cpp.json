@@ -1,0 +1,184 @@
+{
+  "experiment_id": "physics-integrator-energy-drift",
+  "measured_at_utc": "2026-08-08T08:41:17.335327+00:00",
+  "commit_sha": "0beed399724a80dcd90dcfe56531cc9100c48227",
+  "scope": "1D harmonic oscillator (k=1, m=1) over 20 periods",
+  "operating_dt_seconds": 0.016666666666666666,
+  "compiler": "Apple Clang 17.0.0",
+  "compiler_flags": "-std=c++20 -O3 -DNDEBUG -Wall -Wextra",
+  "hardware": {
+    "model": "MacBook Air",
+    "chip": "Apple M2",
+    "cpu_cores": "8 (4 performance + 4 efficiency)",
+    "memory_gb": 8,
+    "architecture": "arm64"
+  },
+  "operating_system": "macOS 26.5.1 (25F80)",
+  "rows": [
+    {
+      "integrator": "explicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.001,
+      "max_drift_pct": 13.3918,
+      "min_drift_pct": 0,
+      "final_drift_pct": 13.3918
+    },
+    {
+      "integrator": "semi_implicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.001,
+      "max_drift_pct": 0.0507355,
+      "min_drift_pct": -0.0505447,
+      "final_drift_pct": 0.000548363
+    },
+    {
+      "integrator": "velocity_verlet",
+      "force_evals_per_step": 2,
+      "dt": 0.001,
+      "max_drift_pct": 0.065124,
+      "min_drift_pct": 0,
+      "final_drift_pct": 0.065124
+    },
+    {
+      "integrator": "rk4",
+      "force_evals_per_step": 4,
+      "dt": 0.001,
+      "max_drift_pct": 0.00026226,
+      "min_drift_pct": -0.001055,
+      "final_drift_pct": -0.00103712
+    },
+    {
+      "integrator": "explicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.0166667,
+      "max_drift_pct": 711.633,
+      "min_drift_pct": 0,
+      "final_drift_pct": 711.633
+    },
+    {
+      "integrator": "semi_implicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.0166667,
+      "max_drift_pct": 0.840318,
+      "min_drift_pct": -0.826907,
+      "final_drift_pct": 0.0199795
+    },
+    {
+      "integrator": "velocity_verlet",
+      "force_evals_per_step": 2,
+      "dt": 0.0166667,
+      "max_drift_pct": 0.000357628,
+      "min_drift_pct": -0.0069201,
+      "final_drift_pct": 0.000154972
+    },
+    {
+      "integrator": "rk4",
+      "force_evals_per_step": 4,
+      "dt": 0.0166667,
+      "max_drift_pct": 0.000369549,
+      "min_drift_pct": -0.000166893,
+      "final_drift_pct": 0.000190735
+    },
+    {
+      "integrator": "explicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.05,
+      "max_drift_pct": 52994.5,
+      "min_drift_pct": 0,
+      "final_drift_pct": 52994.5
+    },
+    {
+      "integrator": "semi_implicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.05,
+      "max_drift_pct": 2.56424,
+      "min_drift_pct": -2.439,
+      "final_drift_pct": 0.0031352
+    },
+    {
+      "integrator": "velocity_verlet",
+      "force_evals_per_step": 2,
+      "dt": 0.05,
+      "max_drift_pct": 0.000226498,
+      "min_drift_pct": -0.0626147,
+      "final_drift_pct": 0.000226498
+    },
+    {
+      "integrator": "rk4",
+      "force_evals_per_step": 4,
+      "dt": 0.05,
+      "max_drift_pct": 3.57628e-05,
+      "min_drift_pct": -0.000172853,
+      "final_drift_pct": -0.000107288
+    },
+    {
+      "integrator": "explicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.1,
+      "max_drift_pct": 26769700.0,
+      "min_drift_pct": 0,
+      "final_drift_pct": 26769700.0
+    },
+    {
+      "integrator": "semi_implicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.1,
+      "max_drift_pct": 5.26313,
+      "min_drift_pct": -4.76193,
+      "final_drift_pct": 0.113273
+    },
+    {
+      "integrator": "velocity_verlet",
+      "force_evals_per_step": 2,
+      "dt": 0.1,
+      "max_drift_pct": 0,
+      "min_drift_pct": -0.250185,
+      "final_drift_pct": -0.000160933
+    },
+    {
+      "integrator": "rk4",
+      "force_evals_per_step": 4,
+      "dt": 0.1,
+      "max_drift_pct": 1.19209e-05,
+      "min_drift_pct": -0.00169873,
+      "final_drift_pct": -0.00169873
+    },
+    {
+      "integrator": "explicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.2,
+      "max_drift_pct": 4976660000000.0,
+      "min_drift_pct": 0,
+      "final_drift_pct": 4976660000000.0
+    },
+    {
+      "integrator": "semi_implicit_euler",
+      "force_evals_per_step": 1,
+      "dt": 0.2,
+      "max_drift_pct": 11.1111,
+      "min_drift_pct": -9.09079,
+      "final_drift_pct": -2.86113
+    },
+    {
+      "integrator": "velocity_verlet",
+      "force_evals_per_step": 2,
+      "dt": 0.2,
+      "max_drift_pct": 0,
+      "min_drift_pct": -1.00004,
+      "final_drift_pct": -0.0213861
+    },
+    {
+      "integrator": "rk4",
+      "force_evals_per_step": 4,
+      "dt": 0.2,
+      "max_drift_pct": 0,
+      "min_drift_pct": -0.0553191,
+      "final_drift_pct": -0.0553191
+    }
+  ],
+  "limitations": [
+    "isolated numerical model; it does not include terrain contact",
+    "energy drift is deterministic numerical evidence, not a wall-clock performance measurement",
+    "force-evaluation count is reported separately from numerical drift"
+  ]
+}

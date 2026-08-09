@@ -21,3 +21,10 @@ benchmarks/
 - 모델과 raw log: `training/artifacts/`에 로컬 보관하고 Git에서 제외
 
 원시 평가 결과, 실험 문서와 plot은 동일한 의미 기반 experiment ID를 공유해야 한다.
+
+## Phase 2d-2 공개 증거
+
+- [`perf-heightmap-at-inline`](experiments/perf-heightmap-at-inline.md): accessor 번역 단위 경계의 C++ 실행 시간 영향
+- [`physics-integrator-energy-drift`](experiments/physics-integrator-energy-drift.md): 운영 dt에서 적분기 에너지 drift와 force-evaluation trade-off
+- [`cpp-correctness-suite__ctest.txt`](evaluations/cpp-correctness-suite__ctest.txt): candidate commit의 native C++ 16/16 실행 로그
+- [`docs/phase2d2-engineering-evidence.md`](../docs/phase2d2-engineering-evidence.md): 하드웨어·표·그래프·해석 제한을 묶은 공개 요약

@@ -1,0 +1,42 @@
+[OUTPUT] 
+Internal ctest changing into directory: /Users/widohun/terrain-sim/core/build
+
+[HANDLER_OUTPUT] 
+Test project /Users/widohun/terrain-sim/core/build
+
+      Start  1: RigidBodyPhysics.EnergyNeverIncreasesDuringFreeFallAndLanding
+ 1/16 Test  #1: RigidBodyPhysics.EnergyNeverIncreasesDuringFreeFallAndLanding ....   Passed    0.01 sec
+      Start  2: RigidBodyPhysics.ClimbsSlopeBelowCriticalAngle
+ 2/16 Test  #2: RigidBodyPhysics.ClimbsSlopeBelowCriticalAngle ...................   Passed    0.00 sec
+      Start  3: RigidBodyPhysics.CannotClimbSlopeAboveCriticalAngle
+ 3/16 Test  #3: RigidBodyPhysics.CannotClimbSlopeAboveCriticalAngle ..............   Passed    0.00 sec
+      Start  4: RigidBodyPhysics.StepIsDeterministicForIdenticalInputs
+ 4/16 Test  #4: RigidBodyPhysics.StepIsDeterministicForIdenticalInputs ...........   Passed    0.00 sec
+      Start  5: RigidBodyPhysics.TunnelsThroughNarrowWallAtHighVelocity
+ 5/16 Test  #5: RigidBodyPhysics.TunnelsThroughNarrowWallAtHighVelocity ..........   Passed    0.00 sec
+      Start  6: RigidBodyPhysics.BlocksApproachToNarrowWallAtModerateVelocity
+ 6/16 Test  #6: RigidBodyPhysics.BlocksApproachToNarrowWallAtModerateVelocity ....   Passed    0.00 sec
+      Start  7: HeightmapSample.ClampsQueryFarOutsideGrid
+ 7/16 Test  #7: HeightmapSample.ClampsQueryFarOutsideGrid ........................   Passed    0.00 sec
+      Start  8: HeightmapSample.ZeroesGradientForQueryFarOutsideGrid
+ 8/16 Test  #8: HeightmapSample.ZeroesGradientForQueryFarOutsideGrid .............   Passed    0.00 sec
+      Start  9: HeightmapSample.InterpolatesFractionalCoordinatesOnLinearSlope
+ 9/16 Test  #9: HeightmapSample.InterpolatesFractionalCoordinatesOnLinearSlope ...   Passed    0.00 sec
+      Start 10: ThermalErodeRefactor.MatchesPreRefactorReferenceCellByCell
+10/16 Test #10: ThermalErodeRefactor.MatchesPreRefactorReferenceCellByCell .......   Passed    0.11 sec
+      Start 11: ThermalErodeRefactor.FindLowestNeighborMatchesReferencePerCell
+11/16 Test #11: ThermalErodeRefactor.FindLowestNeighborMatchesReferencePerCell ...   Passed    0.01 sec
+      Start 12: ThermalErodePullModel.MatchesScatterModelWithinTolerance
+12/16 Test #12: ThermalErodePullModel.MatchesScatterModelWithinTolerance .........   Passed    0.07 sec
+      Start 13: IntegratorComparison.ExplicitEulerEnergyDiverges
+13/16 Test #13: IntegratorComparison.ExplicitEulerEnergyDiverges .................   Passed    0.00 sec
+      Start 14: IntegratorComparison.SemiImplicitEulerEnergyStaysBounded
+14/16 Test #14: IntegratorComparison.SemiImplicitEulerEnergyStaysBounded .........   Passed    0.00 sec
+      Start 15: IntegratorComparison.VelocityVerletEnergyStaysBounded
+15/16 Test #15: IntegratorComparison.VelocityVerletEnergyStaysBounded ............   Passed    0.00 sec
+      Start 16: IntegratorComparison.RK4EnergyDoesNotDiverge
+16/16 Test #16: IntegratorComparison.RK4EnergyDoesNotDiverge .....................   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 16
+
+Total Test time (real) =   0.24 sec

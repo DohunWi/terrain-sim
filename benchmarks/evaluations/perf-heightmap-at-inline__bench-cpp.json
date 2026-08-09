@@ -1,0 +1,1577 @@
+{
+  "experiment_id": "perf-heightmap-at-inline",
+  "measured_at_utc": "2026-08-08T08:40:42.436302+00:00",
+  "metric_scope": "64x64 fBm generation plus 10 thermal-erosion iterations; native C++ only",
+  "before_commit": "66245519242e2739f230c425195ec333bead12ac",
+  "after_commit": "0beed399724a80dcd90dcfe56531cc9100c48227",
+  "compiler": "Apple Clang 17.0.0",
+  "compiler_flags": "-std=c++20 -O3 -DNDEBUG -Wall -Wextra",
+  "hardware": {
+    "model": "MacBook Air",
+    "chip": "Apple M2",
+    "cpu_cores": "8 (4 performance + 4 efficiency)",
+    "memory_gb": 8,
+    "architecture": "arm64"
+  },
+  "operating_system": "macOS 26.5.1 (25F80)",
+  "repeats": 12,
+  "samples_per_run": 200,
+  "warmup_samples_per_run": 10,
+  "execution_order": [
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after",
+    "after",
+    "before",
+    "before",
+    "after",
+    "after",
+    "before"
+  ],
+  "summary": [
+    {
+      "stage": "thermal_erode_only_approx",
+      "unit": "microseconds",
+      "before_run_means_us": [
+        1282.68,
+        918.398,
+        932.991,
+        946.275,
+        974.03,
+        912.895,
+        954.972,
+        938.826,
+        917.054,
+        937.915,
+        949.209,
+        933.172
+      ],
+      "after_run_means_us": [
+        412.786,
+        374.009,
+        357.978,
+        395.039,
+        382.903,
+        370.084,
+        364.718,
+        373.536,
+        352.223,
+        368.13,
+        362.42,
+        361.223
+      ],
+      "before_mean_us": 966.53475,
+      "before_sd_us": 101.04731988270287,
+      "after_mean_us": 372.92075,
+      "after_sd_us": 16.99393624007746,
+      "improvement_pct": 61.41672609287975,
+      "t_approx": 20.068432571068303,
+      "decision": "Accepted"
+    },
+    {
+      "stage": "fbm_plus_thermal_erode_combined",
+      "unit": "microseconds",
+      "before_run_means_us": [
+        3342.11,
+        2898.46,
+        2924.97,
+        2915.3,
+        2977.28,
+        2926.16,
+        2942.7,
+        2929.26,
+        2900.4,
+        2928.65,
+        2939.65,
+        2924.62
+      ],
+      "after_run_means_us": [
+        2452.87,
+        2437.3,
+        2330.57,
+        2363.32,
+        2374.09,
+        2359.4,
+        2355.84,
+        2360.77,
+        2332.15,
+        2355.61,
+        2355.65,
+        2350.23
+      ],
+      "before_mean_us": 2962.463333333333,
+      "before_sd_us": 121.29469353103575,
+      "after_mean_us": 2368.9833333333336,
+      "after_sd_us": 37.700889146335,
+      "improvement_pct": 20.033328119954213,
+      "t_approx": 16.185604298557255,
+      "decision": "Accepted"
+    }
+  ],
+  "raw_runs": {
+    "before": [
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 2059.43,
+            "median_us": 2052.21,
+            "min_us": 1927.88,
+            "max_us": 2372.54
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 1282.68,
+            "median_us": 969.648,
+            "min_us": 791.523,
+            "max_us": 48538.2
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 3342.11,
+            "median_us": 3029.08,
+            "min_us": 2850.96,
+            "max_us": 50597.6
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1025.6,
+            "median_us": 1000.48,
+            "min_us": 852.315,
+            "max_us": 2342.86
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0203749,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.125
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0158807,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 19.209
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1980.06,
+            "median_us": 1962.46,
+            "min_us": 1927.83,
+            "max_us": 2160.29
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 918.398,
+            "median_us": 897.775,
+            "min_us": 850.399,
+            "max_us": 1172.61
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2898.46,
+            "median_us": 2877.83,
+            "min_us": 2830.46,
+            "max_us": 3152.67
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1119.77,
+            "median_us": 1103.4,
+            "min_us": 924.149,
+            "max_us": 1713.11
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0207843,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 10.167
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0157705,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 19.125
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1991.98,
+            "median_us": 1968.75,
+            "min_us": 1924.92,
+            "max_us": 2269.21
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 932.991,
+            "median_us": 902.892,
+            "min_us": 827.35,
+            "max_us": 1181.23
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2924.97,
+            "median_us": 2894.88,
+            "min_us": 2819.33,
+            "max_us": 3173.21
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1041.49,
+            "median_us": 1019.98,
+            "min_us": 910.392,
+            "max_us": 1441.27
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0201566,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.167
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0155662,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.25
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1969.03,
+            "median_us": 1950.58,
+            "min_us": 1926.71,
+            "max_us": 2119.04
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 946.275,
+            "median_us": 915.267,
+            "min_us": 864.684,
+            "max_us": 1301.68
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2915.3,
+            "median_us": 2884.29,
+            "min_us": 2833.71,
+            "max_us": 3270.71
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1081.39,
+            "median_us": 1060.72,
+            "min_us": 938.184,
+            "max_us": 1365.89
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0224544,
+            "median_us": 0.041,
+            "min_us": 0,
+            "max_us": 12.75
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156678,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 14.166
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 2003.25,
+            "median_us": 1982.79,
+            "min_us": 1923.75,
+            "max_us": 2299.92
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 974.03,
+            "median_us": 961.003,
+            "min_us": 833.045,
+            "max_us": 1345.84
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2977.28,
+            "median_us": 2964.25,
+            "min_us": 2836.29,
+            "max_us": 3349.08
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1061.54,
+            "median_us": 1032.17,
+            "min_us": 917.503,
+            "max_us": 1357.88
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0207323,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 13.333
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0162915,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 29.584
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 2013.27,
+            "median_us": 1995.25,
+            "min_us": 1926.42,
+            "max_us": 2251.62
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 912.895,
+            "median_us": 886.605,
+            "min_us": 819.355,
+            "max_us": 1245.44
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2926.16,
+            "median_us": 2899.88,
+            "min_us": 2832.62,
+            "max_us": 3258.71
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1031.09,
+            "median_us": 1008.86,
+            "min_us": 906.313,
+            "max_us": 1248.23
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0205986,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 17.25
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0162973,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 34.416
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1987.72,
+            "median_us": 1965.12,
+            "min_us": 1923.58,
+            "max_us": 2237.5
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 954.972,
+            "median_us": 925.65,
+            "min_us": 842.15,
+            "max_us": 1330.11
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2942.7,
+            "median_us": 2913.38,
+            "min_us": 2829.88,
+            "max_us": 3317.83
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1062.81,
+            "median_us": 1040.11,
+            "min_us": 930.108,
+            "max_us": 1347.19
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0206172,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 18.584
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156258,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 10
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1990.43,
+            "median_us": 1969.38,
+            "min_us": 1927.79,
+            "max_us": 2203.08
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 938.826,
+            "median_us": 909.401,
+            "min_us": 842.567,
+            "max_us": 1245.19
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2929.26,
+            "median_us": 2899.83,
+            "min_us": 2833,
+            "max_us": 3235.62
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1052.32,
+            "median_us": 1044.32,
+            "min_us": 920.609,
+            "max_us": 1335.57
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0211079,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 12.667
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0155786,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.125
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1983.35,
+            "median_us": 1958.83,
+            "min_us": 1924.33,
+            "max_us": 2173.96
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 917.054,
+            "median_us": 886.526,
+            "min_us": 844.942,
+            "max_us": 1312.78
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2900.4,
+            "median_us": 2869.88,
+            "min_us": 2828.29,
+            "max_us": 3296.12
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1043.68,
+            "median_us": 1018.61,
+            "min_us": 923.735,
+            "max_us": 1367.11
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0227371,
+            "median_us": 0.041,
+            "min_us": 0,
+            "max_us": 22.625
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0167538,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 2.625
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1990.73,
+            "median_us": 1969.67,
+            "min_us": 1920,
+            "max_us": 2185.58
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 937.915,
+            "median_us": 914.724,
+            "min_us": 836.432,
+            "max_us": 1208.35
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2928.65,
+            "median_us": 2905.46,
+            "min_us": 2827.17,
+            "max_us": 3199.08
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1054.01,
+            "median_us": 1035.22,
+            "min_us": 915.848,
+            "max_us": 1391.64
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0215473,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 23.5
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.01595,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 26.833
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1990.44,
+            "median_us": 1971.79,
+            "min_us": 1924.08,
+            "max_us": 2200.79
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 949.209,
+            "median_us": 914.474,
+            "min_us": 839.308,
+            "max_us": 1275.85
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2939.65,
+            "median_us": 2904.92,
+            "min_us": 2829.75,
+            "max_us": 3266.29
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1060.03,
+            "median_us": 1035.18,
+            "min_us": 924.392,
+            "max_us": 1520.22
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0202821,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.208
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.016364,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 32.542
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1991.45,
+            "median_us": 1972.67,
+            "min_us": 1925.29,
+            "max_us": 2251.83
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 933.172,
+            "median_us": 912.43,
+            "min_us": 837.972,
+            "max_us": 1196.3
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2924.62,
+            "median_us": 2903.88,
+            "min_us": 2829.42,
+            "max_us": 3187.75
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1054,
+            "median_us": 1034.72,
+            "min_us": 923.014,
+            "max_us": 1354.47
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0212643,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 27.208
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156806,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 15.958
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 2040.08,
+            "median_us": 2022.33,
+            "min_us": 1923.42,
+            "max_us": 2337.17
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 412.786,
+            "median_us": 375.126,
+            "min_us": 237.626,
+            "max_us": 874.668
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2452.87,
+            "median_us": 2415.21,
+            "min_us": 2277.71,
+            "max_us": 2914.75
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 1247.47,
+            "median_us": 827.876,
+            "min_us": 592.876,
+            "max_us": 23826.8
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 3287.56,
+            "median_us": 2867.96,
+            "min_us": 2632.96,
+            "max_us": 25866.9
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1038.98,
+            "median_us": 1010.54,
+            "min_us": 854.626,
+            "max_us": 1369.67
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.022179,
+            "median_us": 0.041,
+            "min_us": 0,
+            "max_us": 11.042
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0163489,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 17.667
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 2063.29,
+            "median_us": 2035.04,
+            "min_us": 1920.33,
+            "max_us": 2728.21
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 374.009,
+            "median_us": 347.457,
+            "min_us": 203.374,
+            "max_us": 763.207
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2437.3,
+            "median_us": 2410.75,
+            "min_us": 2266.67,
+            "max_us": 2826.5
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 751.702,
+            "median_us": 728.749,
+            "min_us": 607.415,
+            "max_us": 1123.46
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2814.99,
+            "median_us": 2792.04,
+            "min_us": 2670.71,
+            "max_us": 3186.75
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 976.717,
+            "median_us": 950.748,
+            "min_us": 816.665,
+            "max_us": 1782.21
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.02037,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.167
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0155881,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.208
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1972.59,
+            "median_us": 1955.75,
+            "min_us": 1919.25,
+            "max_us": 2156.29
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 357.978,
+            "median_us": 335.449,
+            "min_us": 288.573,
+            "max_us": 646.365
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2330.57,
+            "median_us": 2308.04,
+            "min_us": 2261.17,
+            "max_us": 2618.96
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 778.004,
+            "median_us": 742.532,
+            "min_us": 681.782,
+            "max_us": 1065.11
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2750.6,
+            "median_us": 2715.12,
+            "min_us": 2654.38,
+            "max_us": 3037.71
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1018.57,
+            "median_us": 1001.78,
+            "min_us": 902.823,
+            "max_us": 1403.57
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0206516,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 1.584
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156794,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.167
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1968.28,
+            "median_us": 1949.46,
+            "min_us": 1926.71,
+            "max_us": 2129.08
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 395.039,
+            "median_us": 350.965,
+            "min_us": 294.215,
+            "max_us": 1061.17
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2363.32,
+            "median_us": 2319.25,
+            "min_us": 2262.5,
+            "max_us": 3029.46
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 796.188,
+            "median_us": 761.34,
+            "min_us": 693.423,
+            "max_us": 1112.59
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2764.47,
+            "median_us": 2729.62,
+            "min_us": 2661.71,
+            "max_us": 3080.88
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1023.33,
+            "median_us": 998.34,
+            "min_us": 915.84,
+            "max_us": 1228.09
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0212215,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 21.75
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156252,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.167
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1991.19,
+            "median_us": 1965.29,
+            "min_us": 1922.92,
+            "max_us": 2359.75
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 382.903,
+            "median_us": 369.605,
+            "min_us": 274.064,
+            "max_us": 649.606
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2374.09,
+            "median_us": 2360.79,
+            "min_us": 2265.25,
+            "max_us": 2640.79
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 789.295,
+            "median_us": 743.231,
+            "min_us": 657.064,
+            "max_us": 1138.52
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2780.48,
+            "median_us": 2734.42,
+            "min_us": 2648.25,
+            "max_us": 3129.71
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1015.39,
+            "median_us": 994.814,
+            "min_us": 895.272,
+            "max_us": 1248.11
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0208623,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 6.708
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0157619,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 17.791
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1989.31,
+            "median_us": 1966.96,
+            "min_us": 1924.12,
+            "max_us": 2200.75
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 370.084,
+            "median_us": 338.145,
+            "min_us": 272.019,
+            "max_us": 681.978
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2359.4,
+            "median_us": 2327.46,
+            "min_us": 2261.33,
+            "max_us": 2671.29
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 784.443,
+            "median_us": 754.644,
+            "min_us": 664.852,
+            "max_us": 1104.94
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2773.76,
+            "median_us": 2743.96,
+            "min_us": 2654.17,
+            "max_us": 3094.25
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1020.27,
+            "median_us": 998.353,
+            "min_us": 889.561,
+            "max_us": 1277.56
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0201194,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.25
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0162858,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 19
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1991.12,
+            "median_us": 1966.42,
+            "min_us": 1922.21,
+            "max_us": 2241.38
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 364.718,
+            "median_us": 337.338,
+            "min_us": 280.629,
+            "max_us": 626.463
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2355.84,
+            "median_us": 2328.46,
+            "min_us": 2271.75,
+            "max_us": 2617.58
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 784.244,
+            "median_us": 752.212,
+            "min_us": 673.17,
+            "max_us": 1109.88
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2775.37,
+            "median_us": 2743.33,
+            "min_us": 2664.29,
+            "max_us": 3101
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1014.18,
+            "median_us": 995.421,
+            "min_us": 886.796,
+            "max_us": 1288.42
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0209883,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 20.5
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0156659,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 17.209
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1987.24,
+            "median_us": 1970.17,
+            "min_us": 1924.21,
+            "max_us": 2206.58
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 373.536,
+            "median_us": 338.556,
+            "min_us": 281.722,
+            "max_us": 613.014
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2360.77,
+            "median_us": 2325.79,
+            "min_us": 2268.96,
+            "max_us": 2600.25
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 800.211,
+            "median_us": 761.014,
+            "min_us": 668.222,
+            "max_us": 1228.89
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2787.45,
+            "median_us": 2748.25,
+            "min_us": 2655.46,
+            "max_us": 3216.12
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1061.8,
+            "median_us": 1039.26,
+            "min_us": 900.097,
+            "max_us": 1477.76
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0206755,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 9.75
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0162021,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 49.125
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1979.93,
+            "median_us": 1957.67,
+            "min_us": 1923.88,
+            "max_us": 2131.46
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 352.223,
+            "median_us": 328.988,
+            "min_us": 274.196,
+            "max_us": 608.488
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2332.15,
+            "median_us": 2308.92,
+            "min_us": 2254.12,
+            "max_us": 2588.42
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 788.877,
+            "median_us": 754.279,
+            "min_us": 677.487,
+            "max_us": 1049.7
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2768.81,
+            "median_us": 2734.21,
+            "min_us": 2657.42,
+            "max_us": 3029.62
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1038.34,
+            "median_us": 1018.53,
+            "min_us": 913.696,
+            "max_us": 1375.28
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0207175,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 10.5
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0159231,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 38.375
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1987.48,
+            "median_us": 1965.38,
+            "min_us": 1927.25,
+            "max_us": 2206.42
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 368.13,
+            "median_us": 337.811,
+            "min_us": 276.728,
+            "max_us": 637.186
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2355.61,
+            "median_us": 2325.29,
+            "min_us": 2264.21,
+            "max_us": 2624.67
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 796.498,
+            "median_us": 762.394,
+            "min_us": 673.561,
+            "max_us": 1134.35
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2783.98,
+            "median_us": 2749.88,
+            "min_us": 2661.04,
+            "max_us": 3121.83
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1031.08,
+            "median_us": 1005.31,
+            "min_us": 912.894,
+            "max_us": 1324.85
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0204475,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 8.25
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0155733,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 0.125
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1993.23,
+            "median_us": 1973.79,
+            "min_us": 1929.08,
+            "max_us": 2305.08
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 362.42,
+            "median_us": 337.73,
+            "min_us": 274.605,
+            "max_us": 642.229
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2355.65,
+            "median_us": 2330.96,
+            "min_us": 2267.83,
+            "max_us": 2635.46
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 785.989,
+            "median_us": 745.604,
+            "min_us": 665.688,
+            "max_us": 1163.02
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2779.22,
+            "median_us": 2738.83,
+            "min_us": 2658.92,
+            "max_us": 3156.25
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1028.61,
+            "median_us": 1005.81,
+            "min_us": 895.104,
+            "max_us": 1441.27
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.0204638,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 18.625
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.016337,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 22.083
+          }
+        ]
+      },
+      {
+        "stages": [
+          {
+            "name": "heightmap_generate_fbm",
+            "n": 200,
+            "mean_us": 1989.01,
+            "median_us": 1968.33,
+            "min_us": 1927.54,
+            "max_us": 2282.46
+          },
+          {
+            "name": "thermal_erode_only_approx",
+            "n": 200,
+            "mean_us": 361.223,
+            "median_us": 338.245,
+            "min_us": 280.911,
+            "max_us": 709.036
+          },
+          {
+            "name": "fbm_plus_thermal_erode_combined",
+            "n": 200,
+            "mean_us": 2350.23,
+            "median_us": 2327.25,
+            "min_us": 2269.92,
+            "max_us": 2698.04
+          },
+          {
+            "name": "thermal_erode_pull_only_approx",
+            "n": 200,
+            "mean_us": 797.827,
+            "median_us": 759.87,
+            "min_us": 666.245,
+            "max_us": 1369.83
+          },
+          {
+            "name": "fbm_plus_thermal_erode_pull_combined",
+            "n": 200,
+            "mean_us": 2786.83,
+            "median_us": 2748.88,
+            "min_us": 2655.25,
+            "max_us": 3358.83
+          },
+          {
+            "name": "droplet_erode_only_approx_700",
+            "n": 200,
+            "mean_us": 1032.88,
+            "median_us": 1013.95,
+            "min_us": 897.453,
+            "max_us": 1277.95
+          },
+          {
+            "name": "rigid_body_step",
+            "n": 100000,
+            "mean_us": 0.02027,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 14
+          },
+          {
+            "name": "heightmap_sample",
+            "n": 200000,
+            "mean_us": 0.0158327,
+            "median_us": 0,
+            "min_us": 0,
+            "max_us": 13.584
+          }
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "thermal_erode_only_approx subtracts each run's fBm mean from the combined timing",
+    "single-machine local measurement; it is not a cross-platform performance claim",
+    "the benchmark excludes Python, pybind11, networking, and Unity"
+  ]
+}
