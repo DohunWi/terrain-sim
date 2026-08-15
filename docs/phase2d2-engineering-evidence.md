@@ -53,6 +53,7 @@
 | 질문 | 확보한 증거 | 현재 판단 |
 |---|---|---|
 | 고속 물체가 지형을 통과할 수 있는가? | 재현/대조 regression test | 구조적 가능성은 확인. 현재 생성 지형 범위에서는 미발동하여 알고리즘 변경 보류 |
+| 고정 Δt에서 sub-stepping이 필요한가? | 합성 slope-discontinuity 지형 dt sweep (1/240~1/5, θ=30°/60°) — 스크래치 하니스, 원시 로그 미커밋 | in-bounds 구간에서 에너지 보존 위반이 관측되지 않아 현재 dt 범위에서는 불필요하다고 판단. 이 항목만 재현 스크립트가 저장소에 없다 |
 | 경계 밖 sampling이 내부 보간을 오염시키는가? | 경계·fractional-coordinate regression test | height와 gradient 경계를 분리해 수정하고 회귀를 고정 |
 | worker pool에 data race가 있는가? | Linux/GCC ThreadSanitizer CI | 현재 대상 경로에서 race 미검출. 전체 프로그램 무결성의 일반 증명은 아님 |
 | semi-implicit Euler 선택이 합리적인가? | 격리된 oscillator dt sweep | 낮은 force-evaluation 비용에서 발산을 피함. terrain contact 정확도는 별도 검증 필요 |

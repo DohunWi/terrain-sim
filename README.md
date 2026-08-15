@@ -22,11 +22,11 @@ C++ physics
 
 RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵 이탈에서 시간초과로 전이되는 것만 확인, 성공률 개선 없음)을 마지막으로 동결했다. RL은 C++ 코어의 실제 workload이자 case study로 유지하고, 이후 무게중심은 C++ 물리 correctness test, 성능 계측, 병렬 stepping, 아키텍처 근거 문서화로 옮겼다 — 이 작업은 완료됐다.
 
-성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(`benchmarks/experiments/perf-*.md`)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.5배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
+성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(EXP-003~008)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.5배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
 
 C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-threshold, determinism, heightmap 경계, 침식 리팩토링 bit-exactness)를 갖췄고, `.github/workflows/ci.yml`이 push/PR마다 `core/` 전체 CMake 트리를 빌드하고 이 테스트를 GCC(ubuntu-latest)에서 실행한다 — 로컬(AppleClang)에서는 통과하던 코드가 CI 첫 실행에서 표준 라이브러리 구현체 차이로 인한 누락 include를 실제로 잡아냈다.
 
-이 기반 위에 다섯 가지 심화 검증을 추가했다. 고속 물체가 지형을 통과하는 CCD 터널링은 구조적으로는 재현되지만 현재 생성 지형의 경사 범위에서는 발동하지 않음을 회귀 테스트로 확인했고, 그 과정에서 heightmap 경계 밖 쿼리가 gradient 보간을 오염시키던 실제 버그를 찾아 수정했다. `Heightmap::at()`을 `.cpp`에서 header로 옮겨 cross-TU inline을 가능하게 한 결과 fBm + thermal erosion 결합 실행 시간이 평균 20.0% 줄었다 — SIMD 벡터화 자체는 이 워크로드에서 이득이 없다는 걸 확인하는 과정에서 찾아낸 별개의 병목이었다. 4종 적분기(Explicit/Semi-implicit Euler, Velocity Verlet, RK4) dt sweep으로 현재 semi-implicit Euler 선택의 수치적 근거를 확보했고, `bench_batch*` 워커 풀은 Linux/GCC ThreadSanitizer CI에서 race가 검출되지 않았다. 측정 환경, 원시 수치, 한계는 [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md)에 있다.
+이 기반 위에 여섯 가지 심화 검증을 추가했다. 고속 물체가 지형을 통과하는 CCD 터널링은 구조적으로는 재현되지만 현재 생성 지형의 경사 범위에서는 발동하지 않음을 회귀 테스트로 확인했다. 경사 불연속 지형에서 dt를 1/240~1/5까지 훑은 고정 Δt 안정성 검사에서는 sub-stepping이 필요하지 않다는 결론이 나왔고, 이 sweep 도중 heightmap 경계 밖 쿼리가 gradient 보간을 오염시키던 실제 버그를 찾아 수정했다. `Heightmap::at()`을 `.cpp`에서 header로 옮겨 cross-TU inline을 가능하게 한 결과 fBm + thermal erosion 결합 실행 시간이 평균 20.0% 줄었다 — SIMD 벡터화 자체는 이 워크로드에서 이득이 없다는 걸 확인하는 과정에서 찾아낸 별개의 병목이었다. 4종 적분기(Explicit/Semi-implicit Euler, Velocity Verlet, RK4) dt sweep으로 현재 semi-implicit Euler 선택의 수치적 근거를 확보했고, `bench_batch*` 워커 풀은 Linux/GCC ThreadSanitizer CI에서 race가 검출되지 않았다. 측정 환경, 원시 수치, 한계는 [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md)에 있다.
 
 ## 구현된 기능
 
@@ -115,7 +115,9 @@ C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-thresho
 - 100개 지형의 최대 경사: `14.3°`
 - 등반 불가능한 셀과 차단된 직선 경로: `0%`
 
-따라서 이 baseline은 terrain-aware routing보다 관성이 있는 goal navigation을 학습한 결과에 가깝다. 이후 `F_MAX=2.0`, `TALUS_ANGLE=0.15` 후보에서 직선 경로의 56%가 차단되면서도 모든 start-goal 쌍에 우회로가 존재하는 조건을 찾았다. 이 조건에서 나타난 맵 이탈(75%)을 줄이기 위해 out-of-bounds penalty를 5배로 올려 재학습했지만(`reward-oob-50`), 이탈이 준 만큼(-15%p) 시간초과가 늘었을 뿐(+20%p) 성공률은 개선되지 않아 기각했다. 이 결과를 마지막으로 reward/observation 튜닝을 동결하고, 지금은 C++ 물리 correctness test와 성능 계측·병렬화로 무게중심을 옮기는 중이다.
+따라서 이 baseline은 terrain-aware routing보다 관성이 있는 goal navigation을 학습한 결과에 가깝다. 이후 `F_MAX=2.0`, `TALUS_ANGLE=0.15` 후보에서 직선 경로의 56%가 차단되면서도 모든 start-goal 쌍에 우회로가 존재하는 조건을 찾았다. 이 조건에서 나타난 맵 이탈(75%)을 줄이기 위해 out-of-bounds penalty를 5배로 올려 재학습했지만(`reward-oob-50`), 이탈이 준 만큼(-15%p) 시간초과가 늘었을 뿐(+20%p) 성공률은 개선되지 않아 기각했다. 이 결과를 마지막으로 reward/observation 튜닝을 동결했다(이후 C++ 코어 쪽 작업은 위 '현재 상태' 참고).
+
+이 표의 수치는 각 결과 JSON의 `eval_commit_sha`가 가리키는 대로 2026-08-01 heightmap 경계 clamp 수정 **이전**에 측정한 것이다. 당시 지배적 실패 유형이던 맵 이탈이 정확히 그 수정이 건드린 경계 구간에서 나왔으므로, 현재 물리 코드에서 동일 수치가 그대로 재현되지는 않는다. 동결 이후 재측정은 새 사전 등록 실험에 해당해 수행하지 않았다 — 이 표에서 끌어낸 결론은 절대 수치가 아니라 실패 유형의 분포에 근거한다.
 
 성공률이나 training reward만으로 개선을 주장하지 않는다. 실험은 다음 순서를 따른다.
 
@@ -156,6 +158,16 @@ cmake -S . -B build
 cmake --build build
 ./build/terrain_sim_core
 ```
+
+### 테스트
+
+빌드한 뒤 같은 디렉터리에서:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+GoogleTest는 CMake `FetchContent`로 자동으로 내려받으므로 최초 configure에 네트워크가 필요하다.
 
 ### Python binding
 
