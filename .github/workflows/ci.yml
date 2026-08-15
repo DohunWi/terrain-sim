@@ -9,7 +9,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Configure
         run: cmake -S core -B build -DCMAKE_BUILD_TYPE=Release
@@ -29,7 +29,7 @@ jobs:
     # doesn't need to build on every push path that other tests do.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Configure (TSan)
         run: cmake -S core -B build-tsan -DCMAKE_BUILD_TYPE=RelWithDebInfo -DTSAN=ON
