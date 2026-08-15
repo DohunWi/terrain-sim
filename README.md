@@ -1,5 +1,53 @@
 # terrain-sim
 
+## Overview
+
+C++20 simulation core for procedural terrain, thermal/hydraulic erosion, and rigid-body terrain contact. Python (pybind11 → Gymnasium/PPO) evaluates the core; Unity visualizes terrain and replays recorded trajectories. The core builds and runs without either consumer.
+
+Linked documents are in Korean; their benchmark tables, plots, and result JSON are language-neutral. Narrative walkthrough: [case study](https://dohun-wi-portfolio.vercel.app/work/terrain-sim).
+
+### Layout
+
+| Path | Contents |
+|---|---|
+| `core/` | C++20 core (CMake ≥ 3.20) — Perlin/fBm noise, erosion, physics, TCP server, pybind11 bindings |
+| `core/tests/` | GoogleTest suite, 16 tests |
+| `training/` | Gymnasium environment, PPO train/eval, terrain analysis |
+| `unity-client/` | Visualization and trajectory replay only; no simulation math |
+| `benchmarks/` | Pre-registered experiments, fixed-seed results, plots |
+| `docs/` | Protocol and engineering rationale |
+
+### Build and test
+
+```bash
+cd core
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+GoogleTest is fetched by CMake `FetchContent`; the first configure needs network. The `terrain_sim_py` binding target is built only when pybind11 is discoverable, and is skipped otherwise. CI builds `core/` and runs the suite on ubuntu-latest/GCC, plus a ThreadSanitizer job over the `bench_batch*` worker pool.
+
+### Measured results
+
+| Result | Value | Evidence |
+|---|---|---|
+| Env reset throughput scaling, 1→8 threads | 2.95x → 5.33x | [`docs/performance-engineering.md`](docs/performance-engineering.md) |
+| fBm + thermal erosion runtime, `Heightmap::at()` inlined across TUs | −20.0% combined, −61.4% thermal-only | [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md) |
+| Max energy drift at `dt=1/60`, semi-implicit Euler vs. explicit Euler | 0.84% vs. 711.6% | [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md) |
+| Physics step throughput scaling | ~3.4x, unmoved by every intervention tried; treated as this machine's ceiling | [`docs/performance-engineering.md`](docs/performance-engineering.md) |
+
+### Scope limits
+
+- `stepRigidBody` has no friction or restitution. Normal-axis contact response is fully inelastic and tangential velocity is preserved.
+- High-velocity terrain tunneling is reproduced by a paired repro/control test but is not reachable on generated terrain, and is not fixed.
+- The RL environment is frozen (2026-08-01). Its recorded evaluation numbers predate a heightmap boundary fix and do not reproduce against current physics code.
+- `training/` is intentionally outside CI scope while the RL loop is frozen.
+
+---
+
+## 개요
+
 C++ 시뮬레이션 코어 위에 절차적 지형·침식·강체 물리를 구현하고, Python RL 학습 환경과 Unity 시각화 클라이언트를 연결하는 프로젝트다.
 
 시뮬레이션 연산은 C++ 코어가 담당한다. Python은 Gymnasium/PPO 학습 계층, Unity는 파라미터 조작과 결과 재생을 위한 시각화 계층으로 분리했다.
@@ -22,7 +70,7 @@ C++ physics
 
 RL 환경·reward·physics 튜닝은 `reward-oob-50` 실험(실패 유형이 맵 이탈에서 시간초과로 전이되는 것만 확인, 성공률 개선 없음)을 마지막으로 동결했다. RL은 C++ 코어의 실제 workload이자 case study로 유지하고, 이후 무게중심은 C++ 물리 correctness test, 성능 계측, 병렬 stepping, 아키텍처 근거 문서화로 옮겼다 — 이 작업은 완료됐다.
 
-성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(EXP-003~008)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.5배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
+성능 계측 결과 `env.reset()`이 `env.step()`보다 약 870배 비싸다는 걸 발견했고(`docs/performance-engineering.md`), 7건의 pre-registered 실험(EXP-003~008)을 거쳐 실제 병목이 스레드 확장성이 아니라 침식 알고리즘의 셀당 힙 할당(reset 1회당 40,960번)이었음을 확인했다. 이걸 고치고 캐시 라인 정렬을 더한 결과 물리 코어 8개 기준 reset 처리량 스케일링이 2.95배 → 5.33배로 개선됐다(원래 목표였던 4배 초과 달성). 물리 스텝 처리량은 이 개입들과 무관하게 계속 ~3.4배 근방이라, 이건 이 개발 머신의 하드웨어 병렬성 한계로 결론지었다.
 
 C++ 코어는 GoogleTest 기반 correctness test(에너지 보존, slope-threshold, determinism, heightmap 경계, 침식 리팩토링 bit-exactness)를 갖췄고, `.github/workflows/ci.yml`이 push/PR마다 `core/` 전체 CMake 트리를 빌드하고 이 테스트를 GCC(ubuntu-latest)에서 실행한다 — 로컬(AppleClang)에서는 통과하던 코드가 CI 첫 실행에서 표준 라이브러리 구현체 차이로 인한 누락 include를 실제로 잡아냈다.
 
