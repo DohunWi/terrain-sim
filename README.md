@@ -35,7 +35,7 @@ GoogleTest is fetched by CMake `FetchContent`; the first configure needs network
 | Env reset throughput scaling, 1→8 threads | 2.95x → 5.33x | [`docs/performance-engineering.md`](docs/performance-engineering.md) |
 | fBm + thermal erosion runtime, `Heightmap::at()` inlined across TUs | −20.0% combined, −61.4% thermal-only | [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md) |
 | Max energy drift at `dt=1/60`, semi-implicit Euler vs. explicit Euler | 0.84% vs. 711.6% | [`docs/phase2d2-engineering-evidence.md`](docs/phase2d2-engineering-evidence.md) |
-| Physics step throughput scaling | ~3.4x, unmoved by every intervention tried; treated as this machine's ceiling | [`docs/performance-engineering.md`](docs/performance-engineering.md) |
+| Physics step throughput scaling | ~3.4x at 8 threads, unmoved by every intervention tried; cause undetermined — the same sweep reaches 4.77x at 12 threads, so it is not a hardware ceiling (corrected 2026-08-31) | [`docs/performance-engineering.md`](docs/performance-engineering.md) |
 
 ### Scope limits
 
