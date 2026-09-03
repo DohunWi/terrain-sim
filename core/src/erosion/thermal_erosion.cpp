@@ -12,9 +12,7 @@ NeighborList findLowestNeighbor(const Heightmap& h, int x, int y) {
         int nx = x + dx[i];
         int ny = y + dy[i];
 
-        // TODO: nx, ny가 범위 안(0 <= nx < h.width(), 0 <= ny < h.height())인지 체크
-        // TODO: 범위 안이고, h.at(nx, ny)가 best.value보다 작으면 best 갱신
-        //       (best = LowestNeighbor{nx, ny, h.at(nx, ny)};)
+        // 격자 안이면서 자기 자신보다 낮은 이웃만 후보로 모은다.
         if(0<= nx && nx < h.width() && 0 <= ny && ny < h.height()) {
             if(h.at(nx,ny) < current.value ){
                 candidates.items[candidates.count++] = LowestNeighbor{nx, ny, h.at(nx, ny), h.at(x, y) - h.at(nx, ny)};
